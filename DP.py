@@ -157,7 +157,7 @@ def DP(hostTree, parasiteTree, phi, D, T, L):
             else:
                 DUPepeh = Infinity
                 dupList = [Infinity]
-            #   Next, Compute T and create event list to add 
+            # Next, Compute T and create event list to add
             #   to eventsDict using bestSwitchLocations
             if not vpIsATip:
                 switchList = []  # List to keep track of lowest cost switch
