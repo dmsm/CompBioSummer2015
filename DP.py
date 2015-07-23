@@ -16,8 +16,7 @@
 
 import newickFormatReader
 import Greedy
-import copy
-import DrawDTL
+import copy 
 
 Infinity = float('inf')
 
