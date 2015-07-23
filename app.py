@@ -1,173 +1,121 @@
-from flask import Flask, request, render_template, send_from_directory, Markup
-from werkzeug import secure_filename
+#!/usr/local/bin/python
 import os
-from flask_bootstrap import Bootstrap
+import subprocess
+import ast
 
+from flask import Flask, request, render_template, send_from_directory
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-Bootstrap(app)
-UPLOAD_FOLDER = '/Users/Annalise/GitHub/CompBioSummer2015/svgFiles/'
+
+UPLOAD_FOLDER = "tmp"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-@app.route('/index')
+
+@app.route('/')
 def index():
-  """ Returns the index page"""
-  return render_template('index.html', page='home')
+    """ Returns the index page"""
+    return render_template('index.html', page='home')
+
 
 @app.route('/form')
 def form():
-  """Returns the form page"""
-  return render_template('formDTLRnB.html', page='upload')
+    """Returns the form page"""
+    return render_template('form.html', page='upload')
+
 
 @app.route('/documentation')
 def documentation():
-  """Returns the documentation page"""
-  return render_template('documentation.html')
+    """Returns the documentation page"""
+    return render_template('documentation.html')
 
-@app.route('/results')
-def results():
-  """Returns the results page"""
-  return render_template('results.html')  
 
-@app.route('/reconcile', methods = ['GET', 'POST'])
-def reconcile(carousel = None):
-  """ Creates the results page using MasterReconciliation and vistrans"""
-  if request.method == 'POST':
-    file = request.files['newick']
-    if request.form['dup'] != '':
-      Dup = request.form['dup']
-    else: Dup = 2
-    if request.form['trans'] != '':
-      Trans = request.form['trans']
-    else: Trans = 3
-    if request.form['loss'] != '':
-      Loss = request.form["loss"]
-    else: Loss = 1
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] == "newick"
 
-    if request.form['switchhigh'] != '':
-      switchHi = request.form['switchhigh']
-    else: switchHi = 4.5
 
-    if request.form['switchlow'] != '':
-      switchLo = request.form['switchlow']
-    else: switchLo = 1.5
+@app.route('/reconcile', methods=['POST'])
+def reconcile(carousel=None):
+    """ Creates the results page using MasterReconciliation and vistrans"""
+    if request.method == 'POST':
+        # create upload dir if doesn't exits
+        if not os.path.exists(app.config['UPLOAD_FOLDER']):
+            os.makedirs(app.config['UPLOAD_FOLDER'])
 
-    if request.form['losshigh'] != '':
-      lossHi = request.form['losshigh']
-    else: lossHi = 3
+        # clear out files from last run
+        files = os.listdir(app.config['UPLOAD_FOLDER'])
+        for f in files:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], f))
 
-    if request.form['losslow'] != '':
-      lossLo = request.form['losslow']
-    else: lossLo = 1
-
-    if file:
-      filename = secure_filename(file.filename)
-      Name = filename[:-7]
-      os.system("mkdir "+Name)
-      path2files = Name + '/' + Name
-      svgFile = Name + "0.svg"
-      f = open(filename, 'w')
-      f.write(file.read())
-      f.close()
-      os.system("mv "+filename+" "+path2files+'.newick')
-     
-      os.system("python /Users/Annalise/GitHub/CompBioSummer2015/"+\
-        "MasterReconciliation.py "+path2files+".newick"+" "+ \
-        str(Dup)+" "+str(Trans)+" "+str(Loss)+" "+str(request.form["scoring"])\
-        +" "+str(switchLo)+" "+str(switchHi)+" "+str(lossLo)+" "+str(lossHi))
-     
-      os.system('python /Users/Annalise/GitHub/CompBioSummer2015/'+\
-        'ReconConversion.py '+path2files+".newick"+" "+str(Dup)+ \
-        " "+str(Trans)+" "+str(Loss)+" "+str(request.form['scoring'])+" "\
-        +str(switchLo)+" "+str(switchHi)+" "+str(lossLo)+" "+str(lossHi))
-      
-      with open(path2files+"freqFile.txt") as f:
-       lines = f.readlines()
-      scoreList = string2List(lines[0])
-      totalFreq = float(lines[1][:-2])
-      totalRecon = float(lines[3])
-      totalCost = float(lines[2][:-2])
-      if request.form['scoring'] == "Frequency":
-        scoreMethod = "Frequency"
-      elif request.form['scoring'] == "xscape":
-        scoreMethod = "Xscape Scoring"
-      else: scoreMethod = "Unit Scoring"
-      carouselstr = ""
-      carouselcap= ""
-      staticString = "<h4>Duplication Cost:"+str(Dup)+", Transfer Cost: "+\
-      str(Trans)+", Loss Cost: "+str(Loss)+"<br>Maximum Parsimony Cost: "+\
-      str(totalCost)+ "<br>Your scoring method: "+scoreMethod+", Total Sum"+\
-      " of Scores: "+str(totalFreq)+"<br>Total Number of Optimal "+\
-      "Reconciliations: "+str(totalRecon)+"</h4>"
-      for x in range(len(scoreList)):
-        os.system("python vistrans.py -t "+path2files+".tree -s "+path2files+\
-          str(x)+".stree -b "+path2files+str(x)+".mowgli.brecon -o "+\
-          path2files+ str(x)+".svg")
-        
-        score = scoreList[x]
-        percent = 100.0*score/totalFreq
-        if x ==0:
-          runningTot = percent
-          
-          carouselstr+='<li data-target="#results" data-slide-to="0" '+\
-          'class="active"></li>'+"\n"
-          
-          carouselcap+="<div class='item active'><img src='/uploads/"+ Name+\
-          str(x)+".svg' alt='First slide' width='460' height='345'>"+ \
-            "<div class='carousel-caption'><font color='black'><h3>"+\
-            "Reconciliation 1 of "+str(len(scoreList))+"</h3><p>Score = "+\
-            str(score)+"<br>Percent of total = "+str(percent)+"%<br>Running"+\
-            " total = "+str(runningTot)+"%</font></p></div></div>"+"\n"
-          
-          os.system("cp /Users/Annalise/GitHub/CompBioSummer2015/"+\
-            str(path2files)+str(x)+'.svg ' + UPLOAD_FOLDER)
+        # handle uploaded file
+        newick_file = request.files['newick']
+        if newick_file and allowed_file(newick_file.filename):
+            filename = secure_filename(newick_file.filename)
+            raw_name = os.path.splitext(os.path.basename(filename))[0]
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            newick_file.save(file_path)
         else:
-          runningTotScore = runningTotal(scoreList, x)
-          runningTot = 100.0*runningTotScore/totalFreq
-          if runningTot > 100:
-            runningTot = 100
-          carouselstr+='<li data-target="#results" data-slide-to="'+str(x)+\
-          '"></li>'+"\n"
-          carouselcap+="<div class='item'><img src='/uploads/"+ Name+str(x)+\
-          ".svg' alt='First slide' width='460' height='345'>"+\
-           "<div class='carousel-caption'><font color='black'><h3>"+\
-           "Reconciliation "+str(x+1)+" of "+str(len(scoreList))+\
-           "</h3><p>Score = "+ str(score)+" <br>Percent of total = "+\
-           str(percent)+"%<br>Running total = "+str(runningTot)+\
-           "%</font></p></div></div>"+"\n"
-          os.system("cp /Users/Annalise/GitHub/CompBioSummer2015/"+path2files+\
-            str(x)+'.svg ' + UPLOAD_FOLDER)
-    staticString = Markup(staticString)
-    carouselstr = Markup(carouselstr)
-    carouselcap = Markup(carouselcap)
-    #os.system("rm -r "+Name)
-  return render_template("results.html", carouselstr = carouselstr, \
-    carouselcap = carouselcap, staticString = staticString)
+            return render_template("documentation.html")
 
+        dup = request.form['dup'] if request.form['dup'] != '' else 2
+        trans = request.form['trans'] if request.form['dup'] != '' else 3
+        loss = request.form['loss'] if request.form['dup'] != '' else 1
 
-def runningTotal(scoresList, index):
-  """Takes in a list of scores and an integer, index, and returns the sum of 
-  the list's entries up to that index"""
-  runningTot = 0
-  for n in range(len(scoresList)):
-    if n<=index:
-      runningTot += scoresList[n]
-  return runningTot
+        switch_hi = request.form['switchhigh'] if request.form['dup'] != '' else 4.5
+        switch_lo = request.form['switchlow'] if request.form['dup'] != '' else 1.5
 
-def string2List(string):
-  """Takes in a string of a list and returns the list"""
-  newString = string.strip('[')
-  newerString = newString.strip(']\n')
-  stringList = newerString.split(',')
-  for n in range(len(stringList)):
-    stringList[n] = float(stringList[n])
-  return stringList
+        loss_hi = request.form['losshigh'] if request.form['dup'] != '' else 3
+        loss_lo = request.form['losslow'] if request.form['dup'] != '' else 1
+
+        os.system("python MasterReconciliation.py {} {} {} {} {} {} {} {} {}".format(
+            file_path, dup, trans, loss, request.form["scoring"], switch_lo, switch_hi, loss_lo, loss_hi
+        ))
+        os.system("python ReconConversion.py {} {} {} {} {} {} {} {} {}".format(
+            file_path, dup, trans, loss, request.form["scoring"], switch_lo, switch_hi, loss_lo, loss_hi
+        ))
+
+        with open(os.path.join(app.config['UPLOAD_FOLDER'], "{}freqFile.txt".format(raw_name))) as f:
+            lines = f.readlines()
+
+        score_list = ast.literal_eval(lines[0])
+        total_freq = float(lines[1][:-2])
+        total_recon = float(lines[3])
+        total_cost = float(lines[2][:-2])
+
+        if request.form['scoring'] == "Frequency":
+            score_method = "Frequency"
+        elif request.form['scoring'] == "xscape":
+            score_method = "Xscape Scoring"
+        else:
+            score_method = "Unit Scoring"
+
+        results_list = []
+        for x, score in enumerate(score_list):
+            os.system("python vistrans.py -t {} -s {} -b {} -o {}".format(
+                os.path.join(app.config['UPLOAD_FOLDER'], "{}.tree".format(raw_name)),
+                os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.stree".format(raw_name, x)),
+                os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.mowgli.brecon".format(raw_name, x)),
+                os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.svg".format(raw_name, x)),
+            ))
+
+            percent = 100.0 * score / total_freq
+            running_tot_score = sum(score_list[:x])
+            running_tot = min(100.0 * running_tot_score / total_freq, 100)
+
+            results_list.append((score, percent, running_tot))
+
+        return render_template("results.html", results_list=results_list, raw_name=raw_name,
+                               dup=dup, trans=trans, loss=loss, total_cost=total_cost, score_method=score_method,
+                               total_freq=total_freq, total_recon=total_recon)
 
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
-  """Takes in a filename and sends it from the directory to the results page"""
-  return send_from_directory(UPLOAD_FOLDER, filename )
+    """Takes in a filename and sends it from the directory to the results page"""
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
 @app.after_request
 def add_header(response):
     """
@@ -177,5 +125,5 @@ def add_header(response):
     response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
     response.headers['Cache-Control'] = 'public, max-age=0'
     return response
-if __name__ == "__main__":
-  app.run()
+
+app.debug = True

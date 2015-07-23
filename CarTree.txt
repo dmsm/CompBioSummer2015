@@ -1,5 +1,0 @@
-uniform random reconciliations
-No temporal inconsistenct, reconciliation has 1 transfersCarTree.newick contains 0 temporal inconsistencies out of 1 reconciliations.
-Total number of reconciliations: 1.0
-Host tree size: 8
-Parasite tree size: 8

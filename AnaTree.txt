@@ -1,5 +1,0 @@
-uniform random reconciliations
-No temporal inconsistenct, reconciliation has 0 transfersNo temporal inconsistenct, reconciliation has 2 transfersAnaTree.newick contains 0 temporal inconsistencies out of 2 reconciliations.
-Total number of reconciliations: 3.0
-Host tree size: 8
-Parasite tree size: 8

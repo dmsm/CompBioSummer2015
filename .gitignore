@@ -1,12 +1,5 @@
-
+.idea
 *.pyc
-
 *.pyc
-
-heliconius.svg
-
-Vidua.stree
-
-Vidua.svg
-
-Vidua0.mowgli.brecon
+tmp
+venv

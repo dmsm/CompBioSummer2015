@@ -9,7 +9,7 @@
 import DP
 import Greedy
 import newickToVis
-import reconConversion
+import ReconConversion
 import orderGraph
 import newickFormatReader
 import cycleCheckingGraph
@@ -41,7 +41,7 @@ def Reconcile(argList):
 	Order = orderGraph.date(hostv)
 	# Default scoring function (if freqtype== Frequency scoring)
 	DTLReconGraph, numRecon = DP.DP(host, paras, phi, D, T, L)
-	print DTLReconGraph, numRecon
+
 	#uses xScape scoring function
 	if freqType == "xscape":
 		DTLReconGraph = calcCostscapeScore.newScoreWrapper(fileName, switchLo, \
@@ -65,7 +65,7 @@ def Reconcile(argList):
 		else:
 			newickToVis.convert(fileName,hostBranchs, n, 0)
 		# filename[:-7] is the file name minus the .newick
-		reconConversion.convert(rec[n], DTLReconGraph, paras, fileName[:-7], n)
+		ReconConversion.convert(rec[n], DTLReconGraph, paras, fileName[:-7], n)
 
 
 def unitScoreDTL(hostTree, parasiteTree, phi, D, T, L):
