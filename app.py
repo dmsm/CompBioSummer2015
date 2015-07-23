@@ -1,10 +1,15 @@
 #!/usr/local/bin/python
 import os
-import subprocess
 import ast
 
 from flask import Flask, request, render_template, send_from_directory
 from werkzeug.utils import secure_filename
+from compbio.vis import transsvg
+from rasmus import treelib1
+from compbio import phylo
+
+from MasterReconciliation import Reconcile
+from ReconConversion import freqSummation
 
 app = Flask(__name__)
 
@@ -68,12 +73,8 @@ def reconcile(carousel=None):
         loss_hi = request.form['losshigh'] if request.form['dup'] != '' else 3
         loss_lo = request.form['losslow'] if request.form['dup'] != '' else 1
 
-        os.system("python MasterReconciliation.py {} {} {} {} {} {} {} {} {}".format(
-            file_path, dup, trans, loss, request.form["scoring"], switch_lo, switch_hi, loss_lo, loss_hi
-        ))
-        os.system("python ReconConversion.py {} {} {} {} {} {} {} {} {}".format(
-            file_path, dup, trans, loss, request.form["scoring"], switch_lo, switch_hi, loss_lo, loss_hi
-        ))
+        Reconcile([file_path, dup, trans, loss, request.form["scoring"], switch_lo, switch_hi, loss_lo, loss_hi])
+        freqSummation([file_path, dup, trans, loss, request.form["scoring"], switch_lo, switch_hi, loss_lo, loss_hi])
 
         with open(os.path.join(app.config['UPLOAD_FOLDER'], "{}freqFile.txt".format(raw_name))) as f:
             lines = f.readlines()
@@ -92,12 +93,13 @@ def reconcile(carousel=None):
 
         results_list = []
         for x, score in enumerate(score_list):
-            os.system("python vistrans.py -t {} -s {} -b {} -o {}".format(
-                os.path.join(app.config['UPLOAD_FOLDER'], "{}.tree".format(raw_name)),
-                os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.stree".format(raw_name, x)),
-                os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.mowgli.brecon".format(raw_name, x)),
-                os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.svg".format(raw_name, x)),
-            ))
+            tree = treelib1.read_tree(os.path.join(app.config['UPLOAD_FOLDER'], "{}.tree".format(raw_name)))
+            stree = treelib1.read_tree(os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.stree".format(raw_name, x)))
+            brecon = phylo.read_brecon(os.path.join(app.config['UPLOAD_FOLDER'],
+                                                    "{}{}.mowgli.brecon".format(raw_name, x)), tree, stree)
+            output = os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.svg".format(raw_name, x))
+            phylo.add_implied_spec_nodes_brecon(tree, brecon)
+            transsvg.draw_tree(tree, brecon, stree, filename=output)
 
             percent = 100.0 * score / total_freq
             running_tot_score = sum(score_list[:x])
@@ -127,3 +129,4 @@ def add_header(response):
     return response
 
 app.debug = True
+if __name__ == '__main__': app.run()

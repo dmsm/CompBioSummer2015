@@ -24,16 +24,16 @@ def Reconcile(argList):
 	"""Takes command-line arguments of a .newick file, duplication, transfer, 
 	and loss costs, the type of scoring desired and possible switch and loss 
 	ranges. Creates Files for the host, parasite, and reconciliations"""
-	fileName = argList[1] #.newick file
-	D = float(argList[2]) # Duplication cost
-	T = float(argList[3]) # Transfer cost
-	L = float(argList[4]) # Loss cost
-	freqType = argList[5] # Frequency type
+	fileName = argList[0] #.newick file
+	D = float(argList[1]) # Duplication cost
+	T = float(argList[2]) # Transfer cost
+	L = float(argList[3]) # Loss cost
+	freqType = argList[4] # Frequency type
 	# Optional inputs if freqType == xscape
-	switchLo = float(argList[6]) # Switch lower boundary
-	switchHi = float(argList[7]) # Switch upper boundary
-	lossLo = float(argList[8]) # Loss lower boundary
-	lossHi = float(argList[9]) # Loss upper boundary
+	switchLo = float(argList[5]) # Switch lower boundary
+	switchHi = float(argList[6]) # Switch upper boundary
+	lossLo = float(argList[7]) # Loss lower boundary
+	lossHi = float(argList[8]) # Loss upper boundary
 
 	host, paras, phi = newickFormatReader.getInput(fileName)
 	hostRoot = cycleCheckingGraph.findRoot(host)
@@ -120,8 +120,5 @@ def hOrder(hTree, orderMess):
 
 
 
-
-def main():
-	Reconcile(argv)
-
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    Reconcile(argv[1:])

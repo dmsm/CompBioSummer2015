@@ -52,15 +52,15 @@ def freqSummation(argList):
     list of scores for each individual reconciliation, the sum of the those
     scores, the total cost of those reconciliations and the number of
     reconciliations of those trees."""
-    newickFile = argList[1]
-    D = float(argList[2])
-    T = float(argList[3])
-    L = float(argList[4])
-    freqType = argList[5]
-    switchLo = float(argList[6])
-    switchHi = float(argList[7])
-    lossLo = float(argList[8])
-    lossHi = float(argList[9])
+    newickFile = argList[0]
+    D = float(argList[1])
+    T = float(argList[2])
+    L = float(argList[3])
+    freqType = argList[4]
+    switchLo = float(argList[5])
+    switchHi = float(argList[6])
+    lossLo = float(argList[7])
+    lossHi = float(argList[8])
     fileName = newickFile[:-7]
     f = open(fileName + "freqFile.txt", 'w')
     host, paras, phi = newickFormatReader.getInput(newickFile)
@@ -120,8 +120,5 @@ def parasiteParentsDict(P):
     return parentsDict
 
 
-def main():
-    freqSummation(argv)
-
-
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    freqSummation(argv[1:])
