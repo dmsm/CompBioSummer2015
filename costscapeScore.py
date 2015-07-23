@@ -47,7 +47,7 @@ def getNewCoordList(newickFile, switchLo, switchHi, lossLo, lossHi):
     for vertexList in coordList:
         string = "POLYGON(("
         for vertex in vertexList:
-            string = string + str(i[0]) + ' ' + str(i[1]) + ','
+            string = string + str(vertex[0]) + ' ' + str(vertex[1]) + ','
         string = string[:-1] + '))'
         newCoordList.append(string)
     return newCoordList

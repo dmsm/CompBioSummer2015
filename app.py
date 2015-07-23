@@ -73,8 +73,8 @@ def reconcile(carousel=None):
         loss_hi = request.form['losshigh'] if request.form['dup'] != '' else 3
         loss_lo = request.form['losslow'] if request.form['dup'] != '' else 1
 
-        Reconcile([file_path, dup, trans, loss, request.form["scoring"], switch_lo, switch_hi, loss_lo, loss_hi])
-        freqSummation([file_path, dup, trans, loss, request.form["scoring"], switch_lo, switch_hi, loss_lo, loss_hi])
+        Reconcile([file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
+        freqSummation([file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
 
         with open(os.path.join(app.config['UPLOAD_FOLDER'], "{}freqFile.txt".format(raw_name))) as f:
             lines = f.readlines()

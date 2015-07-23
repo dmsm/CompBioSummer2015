@@ -14,21 +14,11 @@ from sys import argv
 import newickFormatReader
 
 
-def deleteCommas(pointList):
-	"""This function takes as input a list of points, returns a that same 
-	list with all commas removed."""
-
-	for point in pointList:
-		point.strip(',')
-	return pointList
-
-
-
 def getDTLReconGraphVals(pointList):
 	"""This function takes as input a list of centroids of the costscape 
 	regions, and returns a list of tuples containing the T, L costs for each 
 	region."""
-	pointList = deleteCommas(pointList)
+	pointList = [point.replace(',', '') for point in pointList]
 	print pointList
 	DTLReconGraphPairs = []
 	for point in pointList:
@@ -83,14 +73,14 @@ def newScoreWrapper(newickFile, switchLo, switchHi, lossLo, lossHi, D, T, L):
 	newDTLReconGraph whose scores were calculated from costscape."""
 
 	H, P, phi = newickFormatReader.getInput(newickFile)
-	originalDTLReconGraph, numRecon, leaves = DP(H, P, phi, D, T, L)
+	originalDTLReconGraph, _ = DP(H, P, phi, D, T, L)
 	pointList = findCenters(newickFile, switchLo, switchHi, lossLo, lossHi)
 	DTLReconGraphPairs = getDTLReconGraphVals(pointList)
 	DTLReconGraphList = getCostscapeDTLReconGraphs(DTLReconGraphPairs, H, P, \
 		phi)
 	newDTLReconGraph = changeDTLReconGraphScores(originalDTLReconGraph, \
 		DTLReconGraphList)
-	return newDTLReconGraph, numRecon, leaves
+	return newDTLReconGraph
 
 
 
