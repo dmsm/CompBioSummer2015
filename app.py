@@ -16,7 +16,7 @@ app = Flask(__name__)
 
 app.config['BROKER_URL'] = os.environ['REDIS_URL']
 app.config['CELERY_RESULT_BACKEND'] = os.environ['REDIS_URL']
-celery = Celery(app.name, broker=app.config['BROKER_URL'])
+celery = Celery(app.name, broker=app.config['REDIS_URL'])
 celery.conf.update(app.config)
 
 UPLOAD_FOLDER = "tmp"
