@@ -68,7 +68,7 @@ def reconcile(carousel=None):
         loss_hi = request.form['losshigh'] if request.form['dup'] != '' else 3
         loss_lo = request.form['losslow'] if request.form['dup'] != '' else 1
 
-        task = tasks.process_files.apply_async(args=[dup, trans, loss, request.form['scoring'], file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
+        task = tasks.process_files.apply_async(args=[app.config['UPLOAD_FOLDER'], dup, trans, loss, request.form['scoring'], file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
 
         return render_template("results.html", task_id=task.id)
 

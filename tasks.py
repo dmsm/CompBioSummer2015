@@ -7,16 +7,15 @@ from celery import Celery
 
 from MasterReconciliation import Reconcile
 from ReconConversion import freqSummation
-from app import app
 
 celery = Celery('tasks', os.environ['REDIS_URL'])
 
 @celery.task(bind=True)
-def process_files(self, dup, trans, loss, scoring, *args):
+def process_files(self, folder, dup, trans, loss, scoring, *args):
     raw_name = os.path.splitext(os.path.basename(args[0]))[0]
     Reconcile(args)
     freqSummation(args)
-    with open(os.path.join(app.config['UPLOAD_FOLDER'], "{}freqFile.txt".format(raw_name))) as f:
+    with open(os.path.join(folder, "{}freqFile.txt".format(raw_name))) as f:
         lines = f.readlines()
 
     score_list = ast.literal_eval(lines[0])
@@ -33,11 +32,11 @@ def process_files(self, dup, trans, loss, scoring, *args):
 
     results_list = []
     for x, score in enumerate(score_list):
-        tree = treelib1.read_tree(os.path.join(app.config['UPLOAD_FOLDER'], "{}.tree".format(raw_name)))
-        stree = treelib1.read_tree(os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.stree".format(raw_name, x)))
-        brecon = phylo.read_brecon(os.path.join(app.config['UPLOAD_FOLDER'],
+        tree = treelib1.read_tree(os.path.join(folder, "{}.tree".format(raw_name)))
+        stree = treelib1.read_tree(os.path.join(folder, "{}{}.stree".format(raw_name, x)))
+        brecon = phylo.read_brecon(os.path.join(folder,
                                                 "{}{}.mowgli.brecon".format(raw_name, x)), tree, stree)
-        output = os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.svg".format(raw_name, x))
+        output = os.path.join(folder, "{}{}.svg".format(raw_name, x))
         phylo.add_implied_spec_nodes_brecon(tree, brecon)
         transsvg.draw_tree(tree, brecon, stree, filename=output)
 
