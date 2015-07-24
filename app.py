@@ -7,9 +7,13 @@ from werkzeug.utils import secure_filename
 from compbio.vis import transsvg
 from rasmus import treelib1
 from compbio import phylo
+from rq import Queue
+from worker import conn
 
 from MasterReconciliation import Reconcile
 from ReconConversion import freqSummation
+
+q = Queue(connection=conn)
 
 app = Flask(__name__)
 
@@ -73,8 +77,10 @@ def reconcile(carousel=None):
         loss_hi = request.form['losshigh'] if request.form['dup'] != '' else 3
         loss_lo = request.form['losslow'] if request.form['dup'] != '' else 1
 
-        Reconcile([file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
-        freqSummation([file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
+        q.enqueue(Reconcile,
+                  [file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
+        q.enqueue(freqSummation,
+                  [file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
 
         with open(os.path.join(app.config['UPLOAD_FOLDER'], "{}freqFile.txt".format(raw_name))) as f:
             lines = f.readlines()
@@ -99,7 +105,7 @@ def reconcile(carousel=None):
                                                     "{}{}.mowgli.brecon".format(raw_name, x)), tree, stree)
             output = os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.svg".format(raw_name, x))
             phylo.add_implied_spec_nodes_brecon(tree, brecon)
-            transsvg.draw_tree(tree, brecon, stree, filename=output)
+            q.enqueue(transsvg.draw_tree, tree, brecon, stree, filename=output)
 
             percent = 100.0 * score / total_freq
             running_tot_score = sum(score_list[:x])
@@ -129,4 +135,5 @@ def add_header(response):
     return response
 
 app.debug = True
-if __name__ == '__main__': app.run()
+if __name__ == '__main__':
+    app.run()
