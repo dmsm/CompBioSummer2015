@@ -1,4 +1,5 @@
-import os, ast
+import os
+import ast
 
 from compbio.vis import transsvg
 from rasmus import treelib1
