@@ -1,23 +1,12 @@
 #!/usr/local/bin/python
 import os
-import ast
 
 from flask import Flask, request, render_template, send_from_directory
 from werkzeug.utils import secure_filename
-from compbio.vis import transsvg
-from rasmus import treelib1
-from compbio import phylo
-from celery import Celery
 
-from MasterReconciliation import Reconcile
-from ReconConversion import freqSummation
+import tasks
 
 app = Flask(__name__)
-
-app.config['BROKER_URL'] = os.environ['REDIS_URL']
-app.config['CELERY_RESULT_BACKEND'] = os.environ['REDIS_URL']
-celery = Celery(app.name, broker=app.config['BROKER_URL'])
-celery.conf.update(app.config)
 
 UPLOAD_FOLDER = "tmp"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -44,49 +33,6 @@ def documentation():
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] == "newick"
-
-
-@celery.task(bind=True)
-def process_files(self, dup, trans, loss, *args):
-    raw_name = os.path.splitext(os.path.basename(args[0]))[0]
-    Reconcile(args)
-    freqSummation(args)
-    with open(os.path.join(app.config['UPLOAD_FOLDER'], "{}freqFile.txt".format(raw_name))) as f:
-        lines = f.readlines()
-
-    score_list = ast.literal_eval(lines[0])
-    total_freq = float(lines[1][:-2])
-    total_recon = float(lines[3])
-    total_cost = float(lines[2][:-2])
-
-    if request.form['scoring'] == "Frequency":
-        score_method = "Frequency"
-    elif request.form['scoring'] == "xscape":
-        score_method = "Xscape Scoring"
-    else:
-        score_method = "Unit Scoring"
-
-    results_list = []
-    for x, score in enumerate(score_list):
-        tree = treelib1.read_tree(os.path.join(app.config['UPLOAD_FOLDER'], "{}.tree".format(raw_name)))
-        stree = treelib1.read_tree(os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.stree".format(raw_name, x)))
-        brecon = phylo.read_brecon(os.path.join(app.config['UPLOAD_FOLDER'],
-                                                "{}{}.mowgli.brecon".format(raw_name, x)), tree, stree)
-        output = os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.svg".format(raw_name, x))
-        phylo.add_implied_spec_nodes_brecon(tree, brecon)
-        transsvg.draw_tree(tree, brecon, stree, filename=output)
-
-        percent = 100.0 * score / total_freq
-        running_tot_score = sum(score_list[:x])
-        running_tot = min(100.0 * running_tot_score / total_freq, 100)
-
-        results_list.append((score, percent, running_tot))
-
-    self.update_state(state='SUCCESS')
-
-    return {results_list: results_list, raw_name: raw_name, dup: dup, trans: trans, loss: loss, total_cost: total_cost,
-            score_method: score_method, total_freq: total_freq, total_recon: total_recon}
-
 
 
 @app.route('/reconcile', methods=['POST'])
@@ -122,44 +68,7 @@ def reconcile(carousel=None):
         loss_hi = request.form['losshigh'] if request.form['dup'] != '' else 3
         loss_lo = request.form['losslow'] if request.form['dup'] != '' else 1
 
-        task = process_files.apply_async(args=[dup, trans, loss, file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
-        # Reconcile([file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
-        # freqSummation([file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
-
-        # with open(os.path.join(app.config['UPLOAD_FOLDER'], "{}freqFile.txt".format(raw_name))) as f:
-        #     lines = f.readlines()
-        #
-        # score_list = ast.literal_eval(lines[0])
-        # total_freq = float(lines[1][:-2])
-        # total_recon = float(lines[3])
-        # total_cost = float(lines[2][:-2])
-        #
-        # if request.form['scoring'] == "Frequency":
-        #     score_method = "Frequency"
-        # elif request.form['scoring'] == "xscape":
-        #     score_method = "Xscape Scoring"
-        # else:
-        #     score_method = "Unit Scoring"
-        #
-        # results_list = []
-        # for x, score in enumerate(score_list):
-        #     tree = treelib1.read_tree(os.path.join(app.config['UPLOAD_FOLDER'], "{}.tree".format(raw_name)))
-        #     stree = treelib1.read_tree(os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.stree".format(raw_name, x)))
-        #     brecon = phylo.read_brecon(os.path.join(app.config['UPLOAD_FOLDER'],
-        #                                             "{}{}.mowgli.brecon".format(raw_name, x)), tree, stree)
-        #     output = os.path.join(app.config['UPLOAD_FOLDER'], "{}{}.svg".format(raw_name, x))
-        #     phylo.add_implied_spec_nodes_brecon(tree, brecon)
-        #     transsvg.draw_tree(tree, brecon, stree, filename=output)
-        #
-        #     percent = 100.0 * score / total_freq
-        #     running_tot_score = sum(score_list[:x])
-        #     running_tot = min(100.0 * running_tot_score / total_freq, 100)
-        #
-        #     results_list.append((score, percent, running_tot))
-
-        # return render_template("results.html", results_list=results_list, raw_name=raw_name,
-        #                        dup=dup, trans=trans, loss=loss, total_cost=total_cost, score_method=score_method,
-        #                        total_freq=total_freq, total_recon=total_recon)
+        task = tasks.process_files.apply_async(args=[dup, trans, loss, request.form['scoring'], file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi])
 
         return render_template("results.html", task_id=task.id)
 

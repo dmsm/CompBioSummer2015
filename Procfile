@@ -1,2 +1,2 @@
 web: gunicorn app:app --log-file=-
-worker: celery worker
+worker: celery -A tasks worker
