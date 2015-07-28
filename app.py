@@ -11,7 +11,7 @@ from worker import conn
 app = Flask(__name__)
 q = Queue(connection=conn)
 
-UPLOAD_FOLDER = "tmp"
+UPLOAD_FOLDER = "/tmp"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -73,7 +73,7 @@ def reconcile(carousel=None):
 
         job = q.enqueue(process_files, app.config['UPLOAD_FOLDER'], dup, trans, loss, request.form['scoring'], file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi)
 
-        return render_template("results.html", task_id=job.id)
+        return "{} {} {}".format(job.id, file_path, open(file_path, 'r').name)
 
 
 
