@@ -3,13 +3,13 @@ import os
 
 from flask import Flask, request, render_template, send_from_directory
 from werkzeug.utils import secure_filename
-from celery.result import AsyncResult
-from iron_celery import iron_cache_backend
+from rq import Queue
 
 from tasks import process_files
+from worker import conn
 
 app = Flask(__name__)
-backend = iron_cache_backend.IronCacheBackend("ironcache://")
+q = Queue(connection=conn)
 
 UPLOAD_FOLDER = "tmp"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -71,17 +71,17 @@ def reconcile(carousel=None):
         loss_hi = request.form['losshigh'] if request.form['dup'] != '' else 3
         loss_lo = request.form['losslow'] if request.form['dup'] != '' else 1
 
-        task = process_files.delay(app.config['UPLOAD_FOLDER'], dup, trans, loss, request.form['scoring'], file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi)
+        job = q.enqueue(process_files, app.config['UPLOAD_FOLDER'], dup, trans, loss, request.form['scoring'], file_path, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi)
 
-        return render_template("results.html", task_id=task.id)
+        return render_template("results.html", task_id=job.id)
 
 
 
 @app.route('/status/<task_id>')
 def taskstatus(task_id):
-    result = AsyncResult(task_id, backend=backend)
-    if result.ready():
-        return render_template("display.html", **result.get())
+    job = q.fetch_job(task_id)
+    if job.result:
+        return render_template("display.html", **job.result)
     else:
         return "PENDING"
 
