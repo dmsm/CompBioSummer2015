@@ -12,8 +12,8 @@ from ReconConversion import freqSummation
 
 celery = Celery('tasks', broker='ironmq://', backend='ironcache://')
 
-@celery.task(bind=True)
-def process_files(self, folder, dup, trans, loss, scoring, *args):
+@celery.task
+def process_files(folder, dup, trans, loss, scoring, *args):
     raw_name = os.path.splitext(os.path.basename(args[0]))[0]
     Reconcile(args)
     freqSummation(args)
@@ -47,8 +47,6 @@ def process_files(self, folder, dup, trans, loss, scoring, *args):
         running_tot = min(100.0 * running_tot_score / total_freq, 100)
 
         results_list.append((score, percent, running_tot))
-
-    self.update_state(state='SUCCESS')
 
     return {results_list: results_list, raw_name: raw_name, dup: dup, trans: trans, loss: loss, total_cost: total_cost,
             score_method: score_method, total_freq: total_freq, total_recon: total_recon}
