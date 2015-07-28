@@ -47,9 +47,9 @@ def reconcile(carousel=None):
             os.makedirs(app.config['UPLOAD_FOLDER'])
 
         # clear out files from last run
-        files = os.listdir(app.config['UPLOAD_FOLDER'])
-        for f in files:
-            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], f))
+        # files = os.listdir(app.config['UPLOAD_FOLDER'])
+        # for f in files:
+        #     os.remove(os.path.join(app.config['UPLOAD_FOLDER'], f))
 
         # handle uploaded file
         newick_file = request.files['newick']
