@@ -8,9 +8,10 @@ from compbio import phylo
 from MasterReconciliation import Reconcile
 from ReconConversion import freqSummation
 
+folder = '/tmp'
 
-def process_files(folder, dup, trans, loss, scoring, *args):
-    raw_name = os.path.splitext(os.path.basename(args[0]))[0]
+def process_files(dup, trans, loss, scoring, *args):
+    raw_name = os.path.splitext(os.path.basename(args[0].name))[0]
     Reconcile(args)
     freqSummation(args)
     with open(os.path.join(folder, "{}freqFile.txt".format(raw_name))) as f:

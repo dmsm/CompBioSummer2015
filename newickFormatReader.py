@@ -21,10 +21,10 @@ from cStringIO import StringIO
 # BioPython libraries
 from Bio import Phylo
 
-def getInput(fileName):
+def getInput(fileHandle):
     """ Takes a fileName as input and returns the hostTree, parasiteTree, and tip mapping phi. """
     
-    fileHandle = open(fileName, 'r')
+    # fileHandle = open(fileName, 'r')
     hostTree, parasiteTree, phi = newickFormatReader(fileHandle)
     fileHandle.close()
     return hostTree, parasiteTree, phi
