@@ -11,7 +11,7 @@ from worker import conn
 app = Flask(__name__)
 q = Queue(connection=conn)
 
-UPLOAD_FOLDER = "/tmp"
+UPLOAD_FOLDER = "/app/temp"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
