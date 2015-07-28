@@ -3,10 +3,13 @@ import os
 
 from flask import Flask, request, render_template, send_from_directory
 from werkzeug.utils import secure_filename
+from celery.result import AsyncResult
+from iron_celery import iron_cache_backend
 
 from tasks import process_files
 
 app = Flask(__name__)
+backend = iron_cache_backend.IronCacheBackend("ironcache://")
 
 UPLOAD_FOLDER = "tmp"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -76,11 +79,11 @@ def reconcile(carousel=None):
 
 @app.route('/status/<task_id>')
 def taskstatus(task_id):
-    task = process_files.AsyncResult(task_id)
-    if task.state == 'PENDING':
-        return "PENDING"
+    result = AsyncResult(task_id, backend=backend)
+    if result.ready():
+        return render_template("display.html", **result.get())
     else:
-        return render_template("display.html", **task.info)
+        return "PENDING"
 
 
 @app.route('/uploads/<filename>')

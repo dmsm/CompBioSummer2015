@@ -5,11 +5,12 @@ from compbio.vis import transsvg
 from rasmus import treelib1
 from compbio import phylo
 from celery import Celery
+import iron_celery
 
 from MasterReconciliation import Reconcile
 from ReconConversion import freqSummation
 
-celery = Celery('tasks', os.environ['REDIS_URL'])
+celery = Celery('tasks', broker='ironmq://', backend='ironcache://')
 
 @celery.task(bind=True)
 def process_files(self, folder, dup, trans, loss, scoring, *args):
