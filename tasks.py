@@ -41,7 +41,7 @@ def process_files(*args):
         tree = treelib1.read_tree("{}.tree".format(raw_name))
         stree = treelib1.read_tree("{}{}.stree".format(raw_name, x))
         brecon = phylo.read_brecon("{}{}.mowgli.brecon".format(raw_name, x), tree, stree)
-        output = "{}{}.svg".format(raw_name, x)
+        output = "/{}{}.svg".format(raw_name, x)
         phylo.add_implied_spec_nodes_brecon(tree, brecon)
         transsvg.draw_tree(tree, brecon, stree, filename=output)
         f = open(output, 'rb')
