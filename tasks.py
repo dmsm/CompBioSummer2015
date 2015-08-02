@@ -44,7 +44,7 @@ def process_files(*args):
         output = "{}{}.svg".format(raw_name, x)
         phylo.add_implied_spec_nodes_brecon(tree, brecon)
         transsvg.draw_tree(tree, brecon, stree, filename=output)
-        conn.upload(output, open(output, 'rb'))
+        conn.upload(output, open(output, 'rb'), content_type='image/svg+xml')
 
         percent = 100.0 * score / total_freq
         running_tot_score = sum(score_list[:x])
