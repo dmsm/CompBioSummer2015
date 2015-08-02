@@ -36,7 +36,9 @@
     </style>
 
     <div id="display">
-        <i class="fa fa-spinner fa-spin"></i>
+        <div class="spinner-loader">
+            Loading…
+        </div>
     </div>
     <br>
     <div class="alert alert-success" role="alert">
@@ -52,10 +54,10 @@
            if (data != "PENDING") {
                $('#display').html(data);
            }
+            else {
+                setTimeout(refresh, 10);
+            }
         });
-        else {
-            setTimeout(refresh, 10);
-        }
     }
     refresh();
     </script>
