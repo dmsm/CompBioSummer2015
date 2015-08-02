@@ -9,7 +9,7 @@ from compbio import phylo
 from MasterReconciliation import Reconcile
 from ReconConversion import freqSummation
 
-folder = '/tmp'
+folder = ''
 
 
 def process_files(*args):
