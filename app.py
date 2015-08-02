@@ -4,6 +4,7 @@ import os
 from flask import Flask, request, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 from rq import Queue
+import tinys3
 
 from tasks import process_files
 from worker import conn
@@ -49,15 +50,17 @@ def reconcile(carousel=None):
         # clear out files from last run
         # files = os.listdir(app.config['UPLOAD_FOLDER'])
         # for f in files:
-        #     os.remove(os.path.join(app.config['UPLOAD_FOLDER'], f))
+        # os.remove(os.path.join(app.config['UPLOAD_FOLDER'], f))
 
         # handle uploaded file
         newick_file = request.files['newick']
         if newick_file and allowed_file(newick_file.filename):
+            conn = tinys3.Connection(os.environ.get('AWS_ACCESS_KEY'), os.environ.get('AWS_SECRET_ACCESS_KEY'),
+                                     default_bucket=os.environ.get('S3_BUCKET_NAME'))
             filename = secure_filename(newick_file.filename)
+            conn.upload(filename, newick_file)
+            file_url = "http://s3.amazonaws.com/{}/{}".format(os.environ.get('S3_BUCKET_NAME'), filename)
             # raw_name = os.path.splitext(os.path.basename(filename))[0]
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            newick_file.save(file_path)
         else:
             return render_template("documentation.html")
 
@@ -71,10 +74,10 @@ def reconcile(carousel=None):
         loss_hi = request.form['losshigh'] if request.form['dup'] != '' else 3
         loss_lo = request.form['losslow'] if request.form['dup'] != '' else 1
 
-        job = q.enqueue(process_files, dup, trans, loss, request.form['scoring'], newick_file, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi)
+        job = q.enqueue(process_files, app.config['UPLOAD_FOLDER'], dup, trans, loss, request.form['scoring'],
+                        file_url, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo, loss_hi)
 
-        return "{} {} {}".format(job.id, file_path, open(file_path, 'r').name)
-
+        return "{} {} {}".format(job.id)
 
 
 @app.route('/status/<task_id>')
@@ -101,6 +104,7 @@ def add_header(response):
     response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
     response.headers['Cache-Control'] = 'public, max-age=0'
     return response
+
 
 app.debug = True
 if __name__ == '__main__':

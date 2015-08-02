@@ -15,18 +15,21 @@
 # of strings of the form:
 # (topVertex, bottomVertex, leftEdgeName, rightEdgeName)
 
+import urllib2
+
 # python libraries
 from cStringIO import StringIO
 
 # BioPython libraries
 from Bio import Phylo
 
-def getInput(fileHandle):
+def getInput(fileName):
     """ Takes a fileName as input and returns the hostTree, parasiteTree, and tip mapping phi. """
-    
+
     # fileHandle = open(fileName, 'r')
+    fileHandle  = urllib2.urlopen(fileName)
     hostTree, parasiteTree, phi = newickFormatReader(fileHandle)
-    fileHandle.close()
+    # fileHandle.close()
     return hostTree, parasiteTree, phi
     
 def newickFormatReader(fileHandle):
