@@ -66,7 +66,7 @@ def reconcile(carousel=None):
         job = q.enqueue(process_files, filename, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi,
                         loss_lo, loss_hi)
 
-        return "{}".format(job.id)
+        return render_template("results.html", task_id=job.id)
 
 
 @app.route('/status/<task_id>')

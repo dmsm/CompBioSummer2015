@@ -26,7 +26,7 @@
         <div class='carousel-inner' role='listbox'>
             {% for score, percent, running_tot in results_list %}
             <div class='item{% if loop.first %} active{% endif %}'>
-                <img src='http://s3.amazonaws.com/dtl-rnb-files/{{ loop.index0 }}.svg' alt='First slide' width='460' height='345'>
+                <img src='http://s3.amazonaws.com/dtl-rnb-files/{{ raw_name }}{{ loop.index0 }}.svg' alt='First slide' width='460' height='345'>
                 <div class='carousel-caption'>
                     <h3>Reconciliation {{ loop.index }} of {{ loop.length }}</h3>
                     <p>Score = {{ score }}<br>Percent of total = {{ percent }}%<br>Running total = {{ percent }}%
