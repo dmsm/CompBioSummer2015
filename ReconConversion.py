@@ -61,7 +61,7 @@ def freqSummation(argList):
     switchHi = float(argList[6])
     lossLo = float(argList[7])
     lossHi = float(argList[8])
-    fileName = newickFile.name[:-7]
+    fileName = newickFile[:-7]
     f = open(fileName + "freqFile.txt", 'w')
     host, paras, phi = newickFormatReader.getInput(newickFile)
     DTL, numRecon = DP.DP(host, paras, phi, D, T, L)
