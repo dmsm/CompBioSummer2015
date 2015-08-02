@@ -76,8 +76,6 @@ def taskstatus(task_id):
     job = q.fetch_job(task_id)
     if job.result:
         return render_template("display.html", **job.result)
-    elif:
-        job.
     else:
         return "PENDING"
 
