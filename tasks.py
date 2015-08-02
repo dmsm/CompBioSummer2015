@@ -2,6 +2,7 @@ import os
 import urllib
 import ast
 
+import tinys3
 from compbio.vis import transsvg
 from rasmus import treelib1
 from compbio import phylo
@@ -9,17 +10,17 @@ from compbio import phylo
 from MasterReconciliation import Reconcile
 from ReconConversion import freqSummation
 
-folder = ''
-
 
 def process_files(*args):
+    conn = tinys3.Connection(os.environ.get('AWS_ACCESS_KEY'), os.environ.get('AWS_SECRET_ACCESS_KEY'),
+                                     default_bucket=os.environ.get('S3_BUCKET_NAME'))
     filename = args[0]
     url = "http://s3.amazonaws.com/{}/{}".format(os.environ.get('S3_BUCKET_NAME'), filename)
     urllib.urlretrieve(url, filename)
     raw_name = os.path.splitext(filename)[0]
     Reconcile(args)
     freqSummation(args)
-    with open(os.path.join(folder, "{}freqFile.txt".format(raw_name))) as f:
+    with open("{}freqFile.txt".format(raw_name)) as f:
         lines = f.readlines()
 
     score_list = ast.literal_eval(lines[0])
@@ -37,13 +38,13 @@ def process_files(*args):
 
     results_list = []
     for x, score in enumerate(score_list):
-        tree = treelib1.read_tree(os.path.join(folder, "{}.tree".format(raw_name)))
-        stree = treelib1.read_tree(os.path.join(folder, "{}{}.stree".format(raw_name, x)))
-        brecon = phylo.read_brecon(os.path.join(folder,
-                                                "{}{}.mowgli.brecon".format(raw_name, x)), tree, stree)
-        output = os.path.join(folder, "{}{}.svg".format(raw_name, x))
+        tree = treelib1.read_tree("{}.tree".format(raw_name))
+        stree = treelib1.read_tree("{}{}.stree".format(raw_name, x))
+        brecon = phylo.read_brecon("{}{}.mowgli.brecon".format(raw_name, x), tree, stree)
+        output = "{}{}.svg".format(raw_name, x)
         phylo.add_implied_spec_nodes_brecon(tree, brecon)
         transsvg.draw_tree(tree, brecon, stree, filename=output)
+        conn.upload(filename, open(output, 'r'))
 
         percent = 100.0 * score / total_freq
         running_tot_score = sum(score_list[:x])

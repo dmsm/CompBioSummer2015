@@ -43,15 +43,6 @@ def allowed_file(filename):
 def reconcile(carousel=None):
     """ Creates the results page using MasterReconciliation and vistrans"""
     if request.method == 'POST':
-        # create upload dir if doesn't exits
-        if not os.path.exists(app.config['UPLOAD_FOLDER']):
-            os.makedirs(app.config['UPLOAD_FOLDER'])
-
-        # clear out files from last run
-        # files = os.listdir(app.config['UPLOAD_FOLDER'])
-        # for f in files:
-        # os.remove(os.path.join(app.config['UPLOAD_FOLDER'], f))
-
         # handle uploaded file
         newick_file = request.files['newick']
         if newick_file and allowed_file(newick_file.filename):
@@ -59,7 +50,6 @@ def reconcile(carousel=None):
                                      default_bucket=os.environ.get('S3_BUCKET_NAME'))
             filename = secure_filename(newick_file.filename)
             conn.upload(filename, newick_file)
-            # raw_name = os.path.splitext(os.path.basename(filename))[0]
         else:
             return render_template("documentation.html")
 
@@ -76,7 +66,7 @@ def reconcile(carousel=None):
         job = q.enqueue(process_files, filename, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi,
                         loss_lo, loss_hi)
 
-        return "{} {} {}".format(job.id)
+        return "{}".format(job.id)
 
 
 @app.route('/status/<task_id>')
@@ -86,12 +76,6 @@ def taskstatus(task_id):
         return render_template("display.html", **job.result)
     else:
         return "PENDING"
-
-
-@app.route('/uploads/<filename>')
-def send_file(filename):
-    """Takes in a filename and sends it from the directory to the results page"""
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 @app.after_request
