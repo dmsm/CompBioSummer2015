@@ -13,7 +13,7 @@ from ReconConversion import freqSummation
 
 def process_files(*args):
     conn = tinys3.Connection(os.environ.get('AWS_ACCESS_KEY'), os.environ.get('AWS_SECRET_ACCESS_KEY'),
-                                     default_bucket=os.environ.get('S3_BUCKET_NAME'))
+                             default_bucket=os.environ.get('S3_BUCKET_NAME'))
     filename = args[0]
     url = "http://s3.amazonaws.com/{}/{}".format(os.environ.get('S3_BUCKET_NAME'), filename)
     urllib.urlretrieve(url, filename)
@@ -44,7 +44,8 @@ def process_files(*args):
         output = "{}{}.svg".format(raw_name, x)
         phylo.add_implied_spec_nodes_brecon(tree, brecon)
         transsvg.draw_tree(tree, brecon, stree, filename=output)
-        conn.upload(filename, open(output, 'r'))
+        f = open(output, 'rb')
+        conn.upload(filename, f)
 
         percent = 100.0 * score / total_freq
         running_tot_score = sum(score_list[:x])
