@@ -10,7 +10,8 @@ from ReconConversion import freqSummation
 
 folder = '/tmp'
 
-def process_files(dup, trans, loss, scoring, *args):
+
+def process_files(*args):
     raw_name = os.path.splitext(os.path.basename(args[0]))[0]
     Reconcile(args)
     freqSummation(args)
@@ -22,6 +23,7 @@ def process_files(dup, trans, loss, scoring, *args):
     total_recon = float(lines[3])
     total_cost = float(lines[2][:-2])
 
+    scoring = args[4]
     if scoring == "Frequency":
         score_method = "Frequency"
     elif scoring == "xscape":
@@ -45,6 +47,7 @@ def process_files(dup, trans, loss, scoring, *args):
 
         results_list.append((score, percent, running_tot))
 
-    return {results_list: results_list, raw_name: raw_name, dup: dup, trans: trans, loss: loss, total_cost: total_cost,
-            score_method: score_method, total_freq: total_freq, total_recon: total_recon}
+    return {'results_list': results_list, 'raw_name': raw_name, 'dup': args[1], 'trans': args[2], 'loss': args[3],
+            'total_cost': total_cost, 'score_method': score_method, 'total_freq': total_freq,
+            'total_recon': total_recon}
 
