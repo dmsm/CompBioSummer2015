@@ -63,8 +63,10 @@ def reconcile(carousel=None):
         loss_hi = request.form['losshigh'] if request.form['dup'] != '' else 3
         loss_lo = request.form['losslow'] if request.form['dup'] != '' else 1
 
-        job = q.enqueue(process_files, filename, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi,
-                        loss_lo, loss_hi)
+        job = q.enqueue_call(func=process_files,
+                             args=(filename, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo,
+                                   loss_hi),
+                             timeout=600)
 
         return render_template("results.html", task_id=job.id)
 
@@ -74,6 +76,8 @@ def taskstatus(task_id):
     job = q.fetch_job(task_id)
     if job.result:
         return render_template("display.html", **job.result)
+    elif:
+        job.
     else:
         return "PENDING"
 
