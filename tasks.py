@@ -1,4 +1,5 @@
 import os
+import urllib
 import ast
 
 from compbio.vis import transsvg
@@ -12,7 +13,10 @@ folder = '/tmp'
 
 
 def process_files(*args):
-    raw_name = os.path.splitext(os.path.basename(args[0]))[0]
+    filename = args[0]
+    url = "http://s3.amazonaws.com/{}/{}".format(os.environ.get('S3_BUCKET_NAME'), filename)
+    urllib.urlretrieve(url, filename)
+    raw_name = os.path.splitext(filename)[0]
     Reconcile(args)
     freqSummation(args)
     with open(os.path.join(folder, "{}freqFile.txt".format(raw_name))) as f:

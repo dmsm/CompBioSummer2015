@@ -59,7 +59,6 @@ def reconcile(carousel=None):
                                      default_bucket=os.environ.get('S3_BUCKET_NAME'))
             filename = secure_filename(newick_file.filename)
             conn.upload(filename, newick_file)
-            file_url = "http://s3.amazonaws.com/{}/{}".format(os.environ.get('S3_BUCKET_NAME'), filename)
             # raw_name = os.path.splitext(os.path.basename(filename))[0]
         else:
             return render_template("documentation.html")
@@ -74,7 +73,7 @@ def reconcile(carousel=None):
         loss_hi = request.form['losshigh'] if request.form['dup'] != '' else 3
         loss_lo = request.form['losslow'] if request.form['dup'] != '' else 1
 
-        job = q.enqueue(process_files, file_url, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi,
+        job = q.enqueue(process_files, filename, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi,
                         loss_lo, loss_hi)
 
         return "{} {} {}".format(job.id)
