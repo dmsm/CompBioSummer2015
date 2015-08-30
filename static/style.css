@@ -1,8 +1,8 @@
 body {
-    padding-top: 70px;
+    padding-top: 51px;
     padding-bottom: 30px;
 }
 
 .row-padded {
-    padding: 35px;
+    padding: 0 35px 20px 0;
 }

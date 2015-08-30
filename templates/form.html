@@ -13,14 +13,13 @@
 {% endblock %}
 
 {% block content %}
-<div class="alert alert-success" role="alert">
+<div class="row row-padded bg-success" role="alert">
     <br>
 
     <h2>Submission and Format:</h2>
 
     <p><b> Please upload a file. Files should be submitted in <samp>.newick</samp> form. When entering species
         names, please avoid using quotation marks and/or unnecessary whitespace.</b></p>
-</div>
 
 <form enctype="multipart/form-data" action="/reconcile" method="post">
     <br>
@@ -29,7 +28,7 @@
         <div class="col-lg-12">
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <label><h3>Inputs for file:</h3></label>
+                    <label><h4>Inputs for file:</h4></label>
                 </div>
                 <div class="container">
                     <br><label>Select a file to upload:</label><input type="file" name="newick">
@@ -81,7 +80,8 @@
     </div>
     <br>
 
-    <h3><input type="submit" value="Submit"></h3><br>
+    <input type="submit" value="Submit">
 
 </form>
+</div>
 {% endblock %}
