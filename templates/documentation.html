@@ -1,12 +1,10 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <div class="alert alert-success" role="alert">
-        <br>
+    <div class="row bg-success">
+        <h1 class="text-success">Documentation</h1>
 
-        <h1>Documentation</h1>
-
-        <p>The <font face="courier">.newick</font> file submitted should contain the name of a file containing the
+        <p>The <samp>.newick</samp> file submitted should contain the name of a file containing the
             species (host) tree and the gene (parasite) tree in newick format, followed by the associations between
             their leaves (one line per association in the format gene:species).</p>
     </div>
@@ -24,12 +22,10 @@
         p32:h16     
         p22:h6      
         p30:h12    
-        </pre>
+    </pre>
 
-    <div class="col-lg-3">
-        <div class="alert alert-info text-center" role="alert">
-            <a href="/form">Back to the upload page</a>
-        </div>
+    <div class="row bg-info">
+        <a href="/form">Back to the upload page</a>
     </div>
 
 {% endblock %}

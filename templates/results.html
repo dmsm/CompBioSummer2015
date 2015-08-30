@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 
-{% block content %}
-
+{% block head %}
     <style>
         .carousel-inner > .item > img,
         .carousel-inner > .item > a > img {
@@ -34,32 +33,35 @@
             z-index: 2;
         }
     </style>
+    <script>
+        $(function () {
+            function refresh() {
+                $.get("status/{{ task_id }}", function (data) {
+                    if (data != "PENDING") {
+                        $('#display').html(data);
+                    }
+                    else {
+                        setTimeout(refresh, 1000);
+                    }
+                });
+            }
 
-    <div id="display">
-        <div class="spinner-loader">
-            Loading…
+            refresh();
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row text-center">
+        <div id="display">
+            <div class="spinner-loader">
+                Loading…
+            </div>
         </div>
     </div>
-    <br>
-    <div class="alert alert-success" role="alert">
-        <center>
-            <strong>Warning!</strong>
-            Exiting this page causes all data to be lost! Please download the reconciliations if you wish to keep them.
+    <div class="row bg-success text-center">
+        <strong>Warning!</strong>
+        Exiting this page causes all data to be lost! Please download the reconciliations if you wish to keep them.
     </div>
-    </center>
-    </div>
-    <script>
-    function refresh() {
-        $.get("status/{{ task_id }}", function(data) {
-           if (data != "PENDING") {
-               $('#display').html(data);
-           }
-            else {
-                setTimeout(refresh, 1000);
-            }
-        });
-    }
-    refresh();
-    </script>
 {% endblock %}
 
