@@ -1,87 +1,92 @@
 {% extends "layout.html" %}
 
 {% block head %}
-<style>
-    .control:checked ~ .conditional {
-        display: block;
-    }
+    <style>
+        .control:checked ~ .conditional {
+            display: block;
+        }
 
-    .control:not(:checked) ~ .conditional {
-        display: none;
-    }
-</style>
+        .control:not(:checked) ~ .conditional {
+            display: none;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-<div class="row row-padded bg-success" role="alert">
-    <br>
+    <div class="row row-padded bg-success" role="alert">
+        <h2>Submission and Format:</h2>
 
-    <h2>Submission and Format:</h2>
+        <p>Please upload a file. Files should be submitted in <samp>.newick</samp> form. When entering species
+            names, please avoid using quotation marks and/or unnecessary whitespace.</p>
 
-    <p><b> Please upload a file. Files should be submitted in <samp>.newick</samp> form. When entering species
-        names, please avoid using quotation marks and/or unnecessary whitespace.</b></p>
+        <form enctype="multipart/form-data" action="/reconcile" method="post">
+            <div class="form-group">
+                <label for="newick">File input</label>
+                <input type="file" id="newick" name="newick">
 
-<form enctype="multipart/form-data" action="/reconcile" method="post">
-    <br>
-
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <label><h4>Inputs for file:</h4></label>
-                </div>
-                <div class="container">
-                    <br><label>Select a file to upload:</label><input type="file" name="newick">
-                    <br><label>Please enter costs for the events. Also, remember that all weights are strictly
-                    positive (nonzero).</label>
-
-                    <div class="col-lg-6">
-                        <br><label>Duplication:</label><input type="text" name="dup" class="form-control"
-                                                              placeholder="Default: 2"><br>
-                        <label>Transfer:</label><input type="text" name="trans" class="form-control"
-                                                       placeholder="Default: 3"><br>
-                        <label>Loss:</label><input type="text" name="loss" class="form-control"
-                                                   placeholder="Default: 1"><br>
-                        <label>Which scoring function would you like to use?<br>
-                            <small>(Default: Unit scoring)</small>
-                        </label><br>
-
-                        <div class="radio">
-                            <input type="radio" name="scoring" value="Frequency">Frequency <br><br>
-                            <input type="radio" class="control" name="scoring" value="xscape"> Xscape Scoring
-                            <fieldset class="conditional">
-                                <label><h5><font color="green">Inputs for Xscape Scoring:</font></h5></label>
-                                <br>
-
-                                <div class="container">
-                                    <div class="col-lg-4">
-                                        <label>Switch low value:</label><input type="text" name="switchlow"
-                                                                               class="form-control"
-                                                                               placeholder="Default: 1.5"><br>
-                                        <label>Switch high value:</label><input type="text" name="switchhigh"
-                                                                                class="form-control"
-                                                                                placeholder="Default: 4.5"><br>
-                                        <label>Loss low value:</label><input type="text" name="losslow"
-                                                                             class="form-control"
-                                                                             placeholder="Default: 1"><br>
-                                        <label>Loss high value:</label><input type="text" name="losshigh"
-                                                                              class="form-control"
-                                                                              placeholder="Default: 3"><br>
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <br> <br>
-                            <input type="radio" name="scoring" value="unit" checked> Unit Scoring <br><br>
-                        </div>
-                    </div>
-                </div>
+                <p class="help-block">Select a newick file to upload.</p>
             </div>
-        </div>
+            <p>Please enter costs for the events. Also, remember that all weights are strictly
+                positive (nonzero).
+
+            <p>
+
+            <div class="form-group">
+                <label for="dup">Duplication</label>
+                <input type="text" class="form-control" id="dup" name="dup" placeholder="Default: 2">
+            </div>
+            <div class="form-group">
+                <label for="trans">Transfer</label>
+                <input type="text" class="form-control" id="trans" name="trans" placeholder="Default: 3">
+            </div>
+            <div class="form-group">
+                <label for="loss">Loss</label>
+                <input type="text" class="form-control" id="loss" name="loss" placeholder="Default: 1">
+            </div>
+
+            <p>Which scoring function would you like to use?<br></p>
+
+            <div class="radio">
+                <label>
+                    <input type="radio" name="scoring" value="Frequency">
+                    Frequency scoring
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" class="control" name="scoring" value="xscape">
+                    Xscape scoring
+                </label>
+            </div>
+            <fieldset class="conditional">
+                <h5>Inputs for Xscape scoring:</h5>
+
+                <div class="form-group">
+                    <label for="trans">Switch low value</label>
+                    <input type="text" class="form-control" id="switchlow" name="switchlow" placeholder="Default: 1.5">
+                </div>
+                <div class="form-group">
+                    <label for="trans">Switch high value</label>
+                    <input type="text" class="form-control" id="switchhigh" name="switchhigh"
+                           placeholder="Default: 4.5">
+                </div>
+                <div class="form-group">
+                    <label for="trans">Loss low value</label>
+                    <input type="text" class="form-control" id="losslow" name="losslow" placeholder="Default: 1">
+                </div>
+                <div class="form-group">
+                    <label for="trans">Loss high value</label>
+                    <input type="text" class="form-control" id="losshigh" name="losshigh" placeholder="Default: 3">
+                </div>
+            </fieldset>
+            <div class="radio disabled">
+                <label>
+                    <input type="radio" name="scoring" value="unit" checked>
+                    Unit scoring
+                </label>
+            </div>
+            <button type="submit" class="btn btn-default">Submit</button>
+
+        </form>
     </div>
-    <br>
-
-    <input type="submit" value="Submit">
-
-</form>
-</div>
 {% endblock %}
