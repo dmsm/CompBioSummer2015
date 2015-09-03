@@ -2,14 +2,21 @@
 
 {% block head %}
     <style>
-        .control:checked ~ .conditional {
-            display: block;
-        }
-
-        .control:not(:checked) ~ .conditional {
-            display: none;
-        }
+    .conditional {
+        display:none;
+    }
     </style>
+    <script>
+        $(document).ready(function () {
+            $("input[name=scoring]").on("change", function () {
+                $(".conditional").hide();
+                var test = $(this).val();
+                if (test == "xscape") {
+                    $(".conditional").show();
+                }
+            });
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -54,7 +61,7 @@
             </div>
             <div class="radio">
                 <label>
-                    <input type="radio" class="control" name="scoring" value="xscape">
+                    <input type="radio" name="scoring" value="xscape">
                     Xscape scoring
                 </label>
             </div>
