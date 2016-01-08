@@ -50,7 +50,6 @@ def freqSummation(argList):
     reconciliations of those trees."""
     newickFile = argList[0]
     costs = {}
-    costs['C'] = 0
     costs['D'] = float(argList[1])
     costs['T'] = float(argList[2])
     costs['L'] = float(argList[3])
@@ -75,7 +74,7 @@ def freqSummation(argList):
     totalCost = 0
     index = reconciliation[0]
     for key in index:
-        totalCost += costs[index[key][0]]
+        totalCost += costs.get(index[key][0], 0)
 
     f.write("{}\n".format(scoresList))
     f.write("{}\n".format(totalSum))
