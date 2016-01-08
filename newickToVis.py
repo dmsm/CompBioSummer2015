@@ -5,7 +5,7 @@
 #File contains function that creates separate newick files for the 
 #parasite tree and the ultra-metric host tree.
 
-from compbio.rasmus import treelib1, util
+from rasmus import treelib1, util
 import copy
 import sys
 import cycleCheckingGraph
