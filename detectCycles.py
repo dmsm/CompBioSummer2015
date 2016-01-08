@@ -134,7 +134,7 @@ def tick(markingDict, node):
     """This function takes as input a markingDict and node which is checked
     but not ticked, and ticks the node in markingDict."""
 
-    markingDict[node] += ['tick']
+    markingDict[node] = markingDict[node] + ['tick']
 
 
 def untick(markingDict, node):
