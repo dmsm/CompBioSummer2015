@@ -254,11 +254,23 @@ def DP(hostTree, parasiteTree, phi, D, T, L):
             _, vp, ep1, ep2 = parasiteTree[ep]
             _, vh, eh1, eh2 = hostTree[eh]
 
+            # is vp a tip?
+            if ep1 == None:
+                vpIsATip = True
+                pChild1 = None
+                pChild2 = None
+            else:
+                vpIsATip = False
+                pChild1 = parasiteTree[ep][2][1]
+                pChild2 = parasiteTree[ep][3][1]
+
             # is vh a tip?
             if eh1 is None:  # then eh2 is None too and vh is a tip!
+                vhIsATip = True
                 hChild1 = None
                 hChild2 = None
             else:
+                vhIsATip = False
                 hChild1 = hostTree[eh][2][1]
                 hChild2 = hostTree[eh][3][1]
             # find best place for a switch to occur (bestSwitch)
