@@ -2,8 +2,8 @@
 # Juliet Forman, Srinidhi Srinivasan, and Annalise Schweickart
 # July 2015
 
-# This file contains the functions for converting DTL reconciliations into 
-# mowgli.brecon files to use in vistrans as well as freqSummation to create a 
+# This file contains the functions for converting DTL reconciliations into
+# mowgli.brecon files to use in vistrans as well as freqSummation to create a
 # file with information to be shown on the website for DTL RnB.
 
 
@@ -68,7 +68,7 @@ def freqSummation(argList):
         newDTL = calcCostscapeScore.newScoreWrapper(newickFile, switchLo, switchHi, lossLo, lossHi, costs['D'],
                                                     costs['T'], costs['L'])
     elif freqType == "unit":
-        newDTL = masterReconciliation.unitScoreDTL(host, paras, phi, costs['D'], costs['T'], costs['L'])
+        newDTL = MasterReconciliation.unitScoreDTL(host, paras, phi, costs['D'], costs['T'], costs['L'])
     scoresList, reconciliation = greedy.Greedy(newDTL, paras)
     totalSum = sum(scoresList)
     totalCost = 0
