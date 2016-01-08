@@ -1,4 +1,4 @@
-# DP.py
+# dp.py
 # Ran Libeskind-Hadas, June 2015
 # The basic DP algorithm for reconciling pairs of trees
 

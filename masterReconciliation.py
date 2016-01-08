@@ -1,4 +1,4 @@
-# MasterReconciliation.py
+# masterReconciliation.py
 # Juliet Forman, Srinidhi Srinivasan, Annalise Schweickart, and Carter Slocum
 # July 2015
 

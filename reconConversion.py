@@ -1,4 +1,4 @@
-# ReconConversion.py
+# reconConversion.py
 # Juliet Forman, Srinidhi Srinivasan, and Annalise Schweickart
 # July 2015
 

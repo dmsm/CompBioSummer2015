@@ -1,4 +1,4 @@
-# Greedy.py
+# greedy.py
 # Srinidhi Srinivasan, Juliet Forman
 # June 2015
 
