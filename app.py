@@ -54,14 +54,14 @@ def reconcile(carousel=None):
             return render_template("documentation.html")
 
         dup = request.form['dup'] if request.form['dup'] != '' else 2
-        trans = request.form['trans'] if request.form['dup'] != '' else 3
-        loss = request.form['loss'] if request.form['dup'] != '' else 1
+        trans = request.form['trans'] if request.form['trans'] != '' else 3
+        loss = request.form['loss'] if request.form['loss'] != '' else 1
 
-        switch_hi = request.form['switchhigh'] if request.form['dup'] != '' else 4.5
-        switch_lo = request.form['switchlow'] if request.form['dup'] != '' else 1.5
+        switch_hi = request.form['switchhigh'] if request.form['switchhigh'] != '' else 4.5
+        switch_lo = request.form['switchlow'] if request.form['switchlow'] != '' else 1.5
 
-        loss_hi = request.form['losshigh'] if request.form['dup'] != '' else 3
-        loss_lo = request.form['losslow'] if request.form['dup'] != '' else 1
+        loss_hi = request.form['losshigh'] if request.form['losshigh'] != '' else 3
+        loss_lo = request.form['losslow'] if request.form['losslow'] != '' else 1
 
         job = q.enqueue_call(func=process_files,
                              args=(filename, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo,
