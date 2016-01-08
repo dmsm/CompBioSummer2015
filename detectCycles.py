@@ -12,10 +12,7 @@
 # that are used by detectCyclesWrapper.
 
 import copy
-from cycleCheckingGraph import *
-import DP
-import Greedy
-import newickFormatReader
+from cycleCheckingGraph import createParentsDict, treeFormat, findRoot
 
 
 def buildReconciliation(HostTree, ParasiteTree, reconciliation):
@@ -34,16 +31,16 @@ def buildReconciliation(HostTree, ParasiteTree, reconciliation):
     cycleCheckingGraph.update(P)
     transferList = []
     for key in reconciliation:
-        #deal with transfer case:
+        # deal with transfer case:
         if reconciliation[key][0] == 'T':
-            #add the children of the parasite node to the list of children
-            #of the host node in cycleCheckingGraph
+            # add the children of the parasite node to the list of children
+            # of the host node in cycleCheckingGraph
             cycleCheckingGraph[key[0]] = P[key[0]] + \
                                          [reconciliation[key][1][1], reconciliation[key][2][1]]
-            #find the parents of the take-off and landing host nodes
+            # find the parents of the take-off and landing host nodes
             parent1 = parents[reconciliation[key][1][1]]
             parent2 = parents[reconciliation[key][2][1]]
-            #add the parasite node as a child of parent1 and parent2
+            # add the parasite node as a child of parent1 and parent2
             cycleCheckingGraph[parent1] = cycleCheckingGraph[parent1] + \
                                           [key[0]]
             cycleCheckingGraph[parent2] = cycleCheckingGraph[parent2] + \
@@ -53,7 +50,7 @@ def buildReconciliation(HostTree, ParasiteTree, reconciliation):
             transferList.append([key[0], parent1, transferEdge1, parent2, \
                                  transferEdge2])
 
-        #deal with speciation case:
+        # deal with speciation case:
         elif reconciliation[key][0] == 'S':
             parent = parents[key[0]]
             if parent != 'Top':
@@ -62,7 +59,7 @@ def buildReconciliation(HostTree, ParasiteTree, reconciliation):
             cycleCheckingGraph[key[1]] = cycleCheckingGraph[key[1]] + \
                                          cycleCheckingGraph[key[0]]
 
-        #deal with duplication case:
+        # deal with duplication case:
         elif reconciliation[key][0] == 'D':
             parent = parents[key[1]]
             if parent != 'Top':
@@ -70,13 +67,13 @@ def buildReconciliation(HostTree, ParasiteTree, reconciliation):
                                              [key[0]]
             cycleCheckingGraph[key[0]] = cycleCheckingGraph[key[0]] + [key[1]]
 
-        #deal with contemporary case:
+        # deal with contemporary case:
         elif reconciliation[key][0] == 'C':
             cycleCheckingGraph[key[1]] = [None]
             cycleCheckingGraph[key[0]] = [None]
 
     for key in cycleCheckingGraph:
-        cycleCheckingGraph[key] = uniquify(cycleCheckingGraph[key])
+        cycleCheckingGraph[key] = list(set(cycleCheckingGraph[key]))
 
     return cycleCheckingGraph, transferList
 
@@ -90,31 +87,30 @@ def detectCycles(HostTree, ParasiteTree, reconciliation):
 
     guiltyTransferList = []
     markingDict = {}
-    cycleCheckingGraph, transferList = buildReconciliation(HostTree, \
+    cycleCheckingGraph, transferList = buildReconciliation(HostTree,
                                                            ParasiteTree, reconciliation)
     Hroot = findRoot(HostTree)
     markingDict[Hroot] = ['check']
     cycleEdge = recurseChildren(cycleCheckingGraph, markingDict, Hroot)
-    newCycleCheckingGraph, guiltyTransfer, transferList = deleteTransfer( \
-        cycleCheckingGraph, markingDict, transferList, cycleEdge)
-    if guiltyTransfer != []:
+    newCycleCheckingGraph, guiltyTransfer, transferList = deleteTransfer(
+            cycleCheckingGraph, markingDict, transferList, cycleEdge)
+    if guiltyTransfer:
         guiltyTransferList.append(guiltyTransfer)
-    while cycleEdge != None:
-        cycleEdge = None
+    while cycleEdge is not None:
         markingDict = {}
-        cycleEdge = recurseChildren(newCycleCheckingGraph, \
+        cycleEdge = recurseChildren(newCycleCheckingGraph,
                                     {Hroot: ['check']}, Hroot)
-        if cycleEdge == None:
+        if cycleEdge is None:
             for node in newCycleCheckingGraph:
                 if not checked(markingDict, node):
                     check(markingDict, node)
-                    cycleEdge = recurseChildren(newCycleCheckingGraph, \
+                    cycleEdge = recurseChildren(newCycleCheckingGraph,
                                                 markingDict, node)
-                    if cycleEdge != None:
+                    if cycleEdge is not None:
                         break
-        newCycleCheckingGraph, guiltyTransfer, transferList = deleteTransfer( \
-            newCycleCheckingGraph, markingDict, transferList, cycleEdge)
-        if guiltyTransfer != []:
+        newCycleCheckingGraph, guiltyTransfer, transferList = deleteTransfer(
+                newCycleCheckingGraph, markingDict, transferList, cycleEdge)
+        if guiltyTransfer:
             guiltyTransferList.append(guiltyTransfer)
 
     return newCycleCheckingGraph, guiltyTransferList
@@ -138,7 +134,7 @@ def tick(markingDict, node):
     """This function takes as input a markingDict and node which is checked
     but not ticked, and ticks the node in markingDict."""
 
-    markingDict[node] = markingDict[node] + ['tick']
+    markingDict[node] += ['tick']
 
 
 def untick(markingDict, node):
@@ -169,17 +165,17 @@ def recurseChildren(cycleCheckingGraph, markingDict, node):
 
     tick(markingDict, node)
     for child in cycleCheckingGraph[node]:
-        if not checked(markingDict, child) and child != None:
+        if not checked(markingDict, child) and child is not None:
             check(markingDict, child)
-            cycleEdge = recurseChildren(cycleCheckingGraph, markingDict, \
+            cycleEdge = recurseChildren(cycleCheckingGraph, markingDict,
                                         child)
 
-            if cycleEdge != None:
+            if cycleEdge is not None:
                 return cycleEdge
 
-        elif child != None:
+        elif child is not None:
             if ticked(markingDict, child):
-                return (node, child)
+                return node, child
 
     untick(markingDict, node)
 
@@ -197,29 +193,17 @@ def deleteTransfer(cycleCheckingGraph, markingDict, transferList, cycleEdge):
 
     newCycleCheckingGraph = copy.deepcopy(cycleCheckingGraph)
     guiltyTransfer = []
-    if cycleEdge == None:
+    if cycleEdge is None:
         return newCycleCheckingGraph, guiltyTransfer, transferList
     node, cycleNode = cycleEdge
-    # for transfer in transferList:
 
-    # if cycleNode in transfer and node in transfer:
-
-    #               guiltyTransfer = transfer
-    #               transferList.remove(transfer)
-    #               #remove all the edges that were added due to the guilty transfer
-    #               removeChild(newCycleCheckingGraph, transfer[1], transfer[0])
-    #               removeChild(newCycleCheckingGraph, transfer[0], transfer[2])
-    #               removeChild(newCycleCheckingGraph, transfer[0], transfer[4])
-    #               if transfer[1] != transfer[3]:
-    #                       removeChild(newCycleCheckingGraph, transfer[3], transfer[0])
-    #               break
     for transfer in transferList:
 
         if cycleNode in transfer:
 
             guiltyTransfer = transfer
             transferList.remove(transfer)
-            #remove all the edges that were added due to the guilty transfer
+            # remove all the edges that were added due to the guilty transfer
             removeChild(newCycleCheckingGraph, transfer[1], transfer[0])
             removeChild(newCycleCheckingGraph, transfer[0], transfer[2])
             removeChild(newCycleCheckingGraph, transfer[0], transfer[4])
@@ -240,7 +224,7 @@ def removeChild(cycleCheckingGraph, parent, child):
     cycleCheckingGraph[parent] = childList
 
 
-def updateReconciliation(guiltyTransferList, HostTree, ParasiteTree, \
+def updateReconciliation(guiltyTransferList, HostTree, ParasiteTree,
                          reconciliation):
     """This function takes as input a list guiltyTransferList of transfers
     that are responsible for cycles, a host tree and parasite tree, and the
@@ -254,11 +238,11 @@ def updateReconciliation(guiltyTransferList, HostTree, ParasiteTree, \
         for key in newReconciliation:
             if reconciliation[key][0] == 'T':
                 # check if transfer and key are the same event
-                if transfer[0] == key[0] and (transfer[2] == key[1] or \
-                                                          transfer[4] == key[1]):
-                    #create a new event 'GT' instead of 'T'
+                if transfer[0] == key[0] and (transfer[2] == key[1] or
+                                                      transfer[4] == key[1]):
+                    # create a new event 'GT' instead of 'T'
                     newValue = ['GT'] + newReconciliation[key][1:]
-                    #replace the old event with newValue in the reconciliation
+                    # replace the old event with newValue in the reconciliation
                     newReconciliation[key] = newValue
     return newReconciliation
 
@@ -269,10 +253,8 @@ def detectCyclesWrapper(HostTree, ParasiteTree, reconciliation):
     the guilty transfers have been removed, and it returns a new
     reconciliation where the guilty transfers have been marked."""
 
-    markingDict = {}
-    newCycleCheckingGraph, guiltyTransferList = detectCycles(HostTree, \
+    newCycleCheckingGraph, guiltyTransferList = detectCycles(HostTree,
                                                              ParasiteTree, reconciliation)
-    newReconciliation = updateReconciliation(guiltyTransferList, HostTree, \
+    newReconciliation = updateReconciliation(guiltyTransferList, HostTree,
                                              ParasiteTree, reconciliation)
     return newReconciliation, newCycleCheckingGraph
-

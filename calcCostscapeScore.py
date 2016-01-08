@@ -8,8 +8,8 @@
 # in which the event appears. The main function is newScoreWrapper, and the 
 # other functions are helper functions for newScoreWrapper.
 
-from DP import *
-from costscapeScore import *
+from dp import DP
+from costscapeScore import findCenters
 import newickFormatReader
 
 
@@ -18,13 +18,10 @@ def getDTLReconGraphVals(pointList):
     regions, and returns a list of tuples containing the T, L costs for each
     region."""
     pointList = [point.replace(',', '') for point in pointList]
-    print pointList
     DTLReconGraphPairs = []
     for point in pointList:
         coordList = point[7:-1].split()
-        pair = []
-        for coord in coordList:
-            pair.append(float(coord))
+        pair = [float(coord) for coord in coordList]
         DTLReconGraphPairs.append(tuple(pair))
     return DTLReconGraphPairs
 
@@ -80,31 +77,3 @@ def newScoreWrapper(newickFile, switchLo, switchHi, lossLo, lossHi, D, T, L):
     newDTLReconGraph = changeDTLReconGraphScores(originalDTLReconGraph,
                                                  DTLReconGraphList)
     return newDTLReconGraph
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

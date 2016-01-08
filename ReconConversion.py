@@ -10,11 +10,11 @@
 # PROF WU VISUALIZATION RECONCILIATION FORMAT CONVERSION
 
 import newickFormatReader
-import DP
-import Greedy
+import dp
+import greedy
 import copy
 import calcCostscapeScore
-import MasterReconciliation
+import masterReconciliation
 from sys import argv
 
 
@@ -61,15 +61,15 @@ def freqSummation(argList):
     fileName = newickFile[:-7]
     f = open("{}freqFile.txt".format(fileName), 'w')
     host, paras, phi = newickFormatReader.getInput(newickFile)
-    DTL, numRecon = DP.DP(host, paras, phi, costs['D'], costs['T'], costs['L'])
+    DTL, numRecon = dp.DP(host, paras, phi, costs['D'], costs['T'], costs['L'])
     if freqType == "Frequency":
         newDTL = DTL
     elif freqType == "xscape":
         newDTL = calcCostscapeScore.newScoreWrapper(newickFile, switchLo, switchHi, lossLo, lossHi, costs['D'],
                                                     costs['T'], costs['L'])
     elif freqType == "unit":
-        newDTL = MasterReconciliation.unitScoreDTL(host, paras, phi, costs['D'], costs['T'], costs['L'])
-    scoresList, reconciliation = Greedy.Greedy(newDTL, paras)
+        newDTL = masterReconciliation.unitScoreDTL(host, paras, phi, costs['D'], costs['T'], costs['L'])
+    scoresList, reconciliation = greedy.Greedy(newDTL, paras)
     totalSum = sum(scoresList)
     totalCost = 0
     index = reconciliation[0]

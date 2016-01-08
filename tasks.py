@@ -7,8 +7,8 @@ from compbio.vis import transsvg
 from rasmus import treelib1
 from compbio import phylo
 
-from MasterReconciliation import Reconcile
-from ReconConversion import freqSummation
+from masterReconciliation import Reconcile
+from reconConversion import freqSummation
 
 
 def process_files(*args):

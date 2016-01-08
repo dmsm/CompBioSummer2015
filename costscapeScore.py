@@ -6,11 +6,7 @@
 # costscape for a given .newick file. The main function is findCenters, and 
 # the rest are helper functions.
 
-# python libraries
-import time
-import math
-
-from newickFormatReader import *
+from newickFormatReader import newickFormatReader
 
 # xscape libraries
 try:
@@ -21,12 +17,9 @@ except ImportError:
 
     sys.path.append(join(realpath(dirname(dirname(__file__))), "python"))
     import xscape
-from xscape.commonAnalytic import *
-from xscape.CostVector import *
 from xscape import reconcile
 from xscape import plotcostsAnalyticNew as plotcosts
 
-import shapely
 from shapely.wkt import loads as load_wkt
 
 
@@ -37,17 +30,16 @@ def getNewCoordList(newickFile, switchLo, switchHi, lossLo, lossHi):
     region from costscape."""
 
     hostTree, parasiteTree, phi = newickFormatReader(newickFile)
-    CVlist = reconcile.reconcile(parasiteTree, hostTree, phi, switchLo, \
+    CVlist = reconcile.reconcile(parasiteTree, hostTree, phi, switchLo,
                                  switchHi, lossLo, lossHi)
-    coordList = plotcosts.plotcosts(CVlist, lossLo, lossHi, switchLo, \
+    coordList = plotcosts.plotcosts(CVlist, lossLo, lossHi, switchLo,
                                     switchHi, "", False, False)
-    print coordList
     newCoordList = []
     for vertexList in coordList:
         string = "POLYGON(("
         for vertex in vertexList:
-            string = string + str(vertex[0]) + ' ' + str(vertex[1]) + ','
-        string = string[:-1] + '))'
+            string = "{}{} {},".format(string, str(vertex[0]), str(vertex[1]))
+        string = "{}))".format(string[:-1])
         newCoordList.append(string)
     return newCoordList
 
@@ -59,23 +51,20 @@ def findCenters(newickFile, switchLo, switchHi, lossLo, lossHi):
     the costscape associated with the given .newick file."""
 
     hostTree, parasiteTree, phi = newickFormatReader(newickFile)
-    CVlist = reconcile.reconcile(parasiteTree, hostTree, phi, switchLo, \
+    CVlist = reconcile.reconcile(parasiteTree, hostTree, phi, switchLo,
                                  switchHi, lossLo, lossHi)
-    coordList = plotcosts.plotcosts(CVlist, lossLo, lossHi, switchLo, \
+    coordList = plotcosts.plotcosts(CVlist, lossLo, lossHi, switchLo,
                                     switchHi, "", False, False)
-    polygonList = getNewCoordList(newickFile, switchLo, switchHi, lossLo, \
+    polygonList = getNewCoordList(newickFile, switchLo, switchHi, lossLo,
                                   lossHi)
     pointList = []
     for i in range(len(polygonList)):
         point = polygonList[i]
-        numCommas = 0
-        for j in range(len(point)):
-            if point[j] == ",":
-                numCommas = numCommas + 1
+        numCommas = point.count(",")
         if numCommas > 1:
             # polygon case
             region = load_wkt(point)
-            pointList.append((region.centroid.wkt))
+            pointList.append(region.centroid.wkt)
         elif numCommas == 1:
             # line case
             x1 = coordList[i][0][0]
@@ -84,9 +73,9 @@ def findCenters(newickFile, switchLo, switchHi, lossLo, lossHi):
             y2 = coordList[i][1][1]
             midx = (x1 + x2) * 1.0 / 2
             midy = (y1 + y2) * 1.0 / 2
-            pointList.append("POINT (" + str(midx) + " " + str(midy) + ")")
+            pointList.append("POINT ({} {})".format(str(midx), str(midy)))
         else:
             # point case
-            pointList.append("POINT " + str(coordList[i][0]))
+            pointList.append("POINT {}".format(str(coordList[i][0])))
 
     return pointList

@@ -48,9 +48,9 @@ def orderDTLRoots(DTL, vertex, level):
         child1 = event[1]
         child2 = event[2]
         keysL = keysL + [(vertex, level)]
-        if child1[0] != None:
+        if child1[0] is not None:
             keysL.extend(orderDTLRoots(DTL, child1, level + 1))
-        if child2[0] != None:
+        if child2[0] is not None:
             keysL.extend(orderDTLRoots(DTL, child2, level + 1))
     return keysL
 
@@ -100,7 +100,7 @@ def bookkeeping(DTL, ParasiteTree):
 
     # Example: BSFHMap = {(mapping node): [['event', (p, h), (p, h), score],
     #                                                               maxScore]}
-    #Example: BSFHEvent = {(event node): max}
+    # Example: BSFHEvent = {(event node): max}
 
     BSFHMap = {}
     BSFHEvent = {}
@@ -108,28 +108,28 @@ def bookkeeping(DTL, ParasiteTree):
     orderedKeysL = postorderDTLsort(DTL, ParasiteRoot)
     for key in orderedKeysL:
         mapNode = key[0]
-        #check if the key is a tip:
+        # check if the key is a tip:
         if DTL[mapNode][0][0] == 'C':
             BSFHMap[mapNode] = [DTL[mapNode][0], DTL[mapNode][0][-1]]
-        #if the key isn't a tip:
+        # if the key isn't a tip:
         else:
-            #initialize counter                                    
+            # initialize counter
             maxScore = float("-inf")
-            #initialize variable to keep track of where max came from
+            # initialize variable to keep track of where max came from
             maxEvent = []
-            #iterate through the events associated with the key node
+            # iterate through the events associated with the key node
             for i in range(len(DTL[mapNode]) - 1):
                 event = tuple(DTL[mapNode][i])
                 BSFHEvent[event] = event[-1]
                 if event[1] != (None, None):
-                    BSFHEvent[event] = BSFHEvent[event] + BSFHMap[event[1]][-1]
+                    BSFHEvent[event] += BSFHMap[event[1]][-1]
                 if event[2] != (None, None):
-                    BSFHEvent[event] = BSFHEvent[event] + BSFHMap[event[2]][-1]
-                #check if current event has a higher score than current max
+                    BSFHEvent[event] += BSFHMap[event[2]][-1]
+                # check if current event has a higher score than current max
                 if BSFHEvent[event] > maxScore:
-                    maxScore = BSFHEvent[event]  #set new max score
-                    maxEvent = list(event)  #record where new max came from
-            BSFHMap[mapNode] = [maxEvent, maxScore]  #set BSFH value of key
+                    maxScore = BSFHEvent[event]  # set new max score
+                    maxEvent = list(event)  # record where new max came from
+            BSFHMap[mapNode] = [maxEvent, maxScore]  # set BSFH value of key
     return BSFHMap
 
 
@@ -153,7 +153,7 @@ def TraceChildren(DTL, GreedyOnce, BSFHMap, key):
                 newValue = DTL[child1]
                 newValue[i][-1] = 0
                 reset1DTL[child1] = newValue
-        #this recursive call updates GreedyOnce and the DTL graph
+        # this recursive call updates GreedyOnce and the DTL graph
         newGreedyOnce, DTL1 = TraceChildren(DTL, GreedyOnce, BSFHMap, child1)
         reset1DTL.update(DTL1)
         GreedyOnce.update(newGreedyOnce)
@@ -188,22 +188,20 @@ def greedyOnce(DTL, ParasiteTree):
     bestScore = float("-inf")  # variable to hold the highest BSFH value so far
     # iterate trough all the keys (verteces) in BSFHMap
     for key in BSFHMap:
-        #check if key has a score higher than bestScore and includes PRoot
+        # check if key has a score higher than bestScore and includes PRoot
         if BSFHMap[key][-1] > bestScore and key[0] == ParasiteRoot:
             bestKey = key
             bestScore = BSFHMap[key][-1]
-    #set value in GreedyOnce of the best key we found
+    # set value in GreedyOnce of the best key we found
     GreedyOnce[bestKey] = BSFHMap[bestKey][0][0:3]
 
-    #reset score of the mapping node we used to 0:
-
-    #loop through the events associated with DTL
+    # loop through the events associated with DTL
     for i in range(len(DTL[bestKey]) - 1):
-        #check if the event matches the event that gave the best score                      
+        # check if the event matches the event that gave the best score
         if DTL[bestKey][i] == BSFHMap[bestKey][0]:
             newEvent = DTL[bestKey][i][:-1] + [0]
             newValue = DTL[bestKey][:i] + [newEvent] + DTL[bestKey][i + 1:]
-            DTL[bestKey] = newValue  #set the score to 0
+            DTL[bestKey] = newValue  # set the score to 0
     newGreedyOnce, resetDTL = TraceChildren(DTL, GreedyOnce, BSFHMap, bestKey)
     GreedyOnce.update(newGreedyOnce)
     DTL.update(resetDTL)
@@ -224,13 +222,10 @@ def Greedy(DTL, ParasiteTree):
         oneTree, currentDTL, score = greedyOnce(currentDTL, ParasiteTree)
         scores.append(score)
         rec.append(oneTree)
-        collected = False  #set not0 to False
-        zeroes = 0
-        events = 0
-        #iterate to see if more points need to be collected
+        collected = False  # set not0 to False
+        # iterate to see if more points need to be collected
         for key in currentDTL:
             for i in range(len(currentDTL[key]) - 1):
-                if currentDTL[key][i][-1] != 0:
-                    collected = True
+                collected = currentDTL[key][i][-1] != 0
 
     return scores, rec

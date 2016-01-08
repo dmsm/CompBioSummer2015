@@ -6,10 +6,10 @@
 # DTL reconciliations using the edge-based DP algorithm.  The main # # function in this file is called Reconcile and the remaining 
 # functions are helper functions that are used by Reconcile.
 
-import DP
-import Greedy
+import dp
+import greedy
 import newickToVis
-import ReconConversion
+import reconConversion
 import orderGraph
 import newickFormatReader
 import cycleCheckingGraph
@@ -18,7 +18,6 @@ import sys
 import copy
 import calcCostscapeScore
 import detectCycles
-import os
 
 
 def Reconcile(argList):
@@ -37,22 +36,20 @@ def Reconcile(argList):
     lossHi = float(argList[8])  # Loss upper boundary
 
     host, paras, phi = newickFormatReader.getInput(fileName)
-    hostRoot = cycleCheckingGraph.findRoot(host)
     hostv = cycleCheckingGraph.treeFormat(host)
-    Order = orderGraph.date(hostv)
     # Default scoring function (if freqtype== Frequency scoring)
-    DTLReconGraph, numRecon = DP.DP(host, paras, phi, D, T, L)
+    DTLReconGraph, numRecon = dp.DP(host, paras, phi, D, T, L)
 
     # uses xScape scoring function
     if freqType == "xscape":
-        DTLReconGraph = calcCostscapeScore.newScoreWrapper(fileName, switchLo, \
+        DTLReconGraph = calcCostscapeScore.newScoreWrapper(fileName, switchLo,
                                                            switchHi, lossLo, lossHi, D, T, L)
-    #uses Unit scoring function
+    # uses Unit scoring function
     elif freqType == "unit":
         DTLReconGraph = unitScoreDTL(host, paras, phi, D, T, L)
 
     DTLGraph = copy.deepcopy(DTLReconGraph)
-    scoresList, rec = Greedy.Greedy(DTLGraph, paras)
+    scoresList, rec = greedy.Greedy(DTLGraph, paras)
     for n in range(len(rec)):
         graph = cycleCheckingGraph.buildReconciliation(host, paras, rec[n])
         currentOrder = orderGraph.date(graph)
@@ -66,7 +63,7 @@ def Reconcile(argList):
         else:
             newickToVis.convert(fileName, hostBranchs, n, 0)
         # filename[:-7] is the file name minus the .newick
-        ReconConversion.convert(rec[n], DTLReconGraph, paras, fileName[:-7], n)
+        reconConversion.convert(rec[n], DTLReconGraph, paras, fileName[:-7], n)
 
 
 def unitScoreDTL(hostTree, parasiteTree, phi, D, T, L):
@@ -74,7 +71,7 @@ def unitScoreDTL(hostTree, parasiteTree, phi, D, T, L):
     duplication cost (D), transfer cost (T), and loss cost (L) and returns the
     DTL graph in the form of a dictionary, with event scores set to 1.
     Cospeciation is assumed to cost 0. """
-    DTLReconGraph, numRecon = DP.DP(hostTree, parasiteTree, phi, D, T, L)
+    DTLReconGraph, numRecon = dp.DP(hostTree, parasiteTree, phi, D, T, L)
     newDTL = {}
     for vertex in DTLReconGraph:
         newDTL[vertex] = []
@@ -89,12 +86,12 @@ def branch(tree, treeOrder):
     """Computes Ultra-metric Branchlength from a tree dating"""
     branches = {}
     for key in tree:
-        if key != None:
+        if key is not None:
             for child in tree[key]:
-                if child != None:
+                if child is not None:
                     branches[child] = abs(treeOrder[child] - treeOrder[key])
     for key in treeOrder:
-        if not key in branches:
+        if key not in branches:
             branches[key] = 0
     return branches
 
@@ -111,10 +108,8 @@ def hOrder(hTree, orderMess):
     for item in range(len(messList)):
         if messList[item] in hTree and not hTree[messList[item]] == [None, None]:
             hostOrder[messList[item]] = place
-
             place += 1
         elif messList[item] in hTree and hTree[messList[item]] == [None, None]:
-
             leaves.append(messList[item])
     for item in leaves:
         hostOrder[item] = place

@@ -11,17 +11,17 @@ def date(cycleGraph):
         of the ordering of the tree. If there is a cycle, the function returns timeTravel"""
     # ordering of the Nodes
     order = {}
-    #InnerNodes
+    # InnerNodes
     innerNodes = {}
     # dict of Leaves
     Leaves = {}
-    #List of Nodes with In-degree zero
+    # List of Nodes with In-degree zero
     LonerList = []
     for key in cycleGraph.keys():
-        if key != None:
+        if key is not None:
             innerNodes[key] = 0
         for child in cycleGraph[key]:
-            if child != None:
+            if child is not None:
                 innerNodes[child] = 0
             else:
                 Leaves[key] = True
@@ -30,7 +30,7 @@ def date(cycleGraph):
             del innerNodes[key]
     for key in innerNodes.keys():
         for child in cycleGraph[key]:
-            if child != None and child in innerNodes:
+            if child is not None and child in innerNodes:
                 innerNodes[child] += 1
     place = 0
     for key in innerNodes.keys():
