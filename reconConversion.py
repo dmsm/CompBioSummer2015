@@ -68,7 +68,7 @@ def freqSummation(argList):
         newDTL = calcCostscapeScore.newScoreWrapper(newickFile, switchLo, switchHi, lossLo, lossHi, costs['D'],
                                                     costs['T'], costs['L'])
     elif freqType == "unit":
-        newDTL = MasterReconciliation.unitScoreDTL(host, paras, phi, costs['D'], costs['T'], costs['L'])
+        newDTL = masterReconciliation.unitScoreDTL(host, paras, phi, costs['D'], costs['T'], costs['L'])
     scoresList, reconciliation = greedy.Greedy(newDTL, paras)
     totalSum = sum(scoresList)
     totalCost = 0
