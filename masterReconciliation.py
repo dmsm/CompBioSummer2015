@@ -28,7 +28,7 @@ def Reconcile(argList):
     D = float(argList[1])  # Duplication cost
     T = float(argList[2])  # Transfer cost
     L = float(argList[3])  # Loss cost
-    print D,T,L
+    print argList[1], argList[2], argList[3]
     freqType = argList[4]  # Frequency type
     # Optional inputs if freqType == xscape
     switchLo = float(argList[5])  # Switch lower boundary
