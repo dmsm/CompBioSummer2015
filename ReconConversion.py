@@ -72,10 +72,11 @@ def freqSummation(argList):
         newDTL = MasterReconciliation.unitScoreDTL(host, paras, phi, costs['D'], costs['T'], costs['L'])
     scoresList, reconciliation = Greedy.Greedy(newDTL, paras)
     totalSum = sum(scoresList)
-    for index in reconciliation:
-        totalCost = 0
-        for key in index:
-            totalCost += costs[index[key][0]]
+    totalCost = 0
+    index = reconciliation[0]
+    for key in index:
+        totalCost += costs[index[key][0]]
+
     f.write("{}\n".format(scoresList))
     f.write("{}\n".format(totalSum))
     f.write("{}\n".format(totalCost))
