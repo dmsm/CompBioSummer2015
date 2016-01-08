@@ -21,13 +21,15 @@ from cStringIO import StringIO
 # BioPython libraries
 from Bio import Phylo
 
+
 def getInput(fileName):
     """ Takes a fileName as input and returns the hostTree, parasiteTree, and tip mapping phi. """
 
     fileHandle = open(fileName, 'r')
     hostTree, parasiteTree, phi = newickFormatReader(fileHandle)
     return hostTree, parasiteTree, phi
-    
+
+
 def newickFormatReader(fileHandle):
     """ Queries the user for a newick host tree, newick parasite tree, and
         a tip association file.  Reads those files, parses them, and returns
@@ -36,7 +38,7 @@ def newickFormatReader(fileHandle):
         The trees are returned in the dictionary format
         used by xscape and the tip associations are returned as a dictionary
         with parasite names as keys and host tips as values. """
-    
+
     if isinstance(fileHandle, basestring):
         fileHandle = open(fileHandle, 'r')
         autoclose = True
@@ -49,7 +51,7 @@ def newickFormatReader(fileHandle):
     hostString = hostString.strip()
     parasiteString = parasiteString.strip()
     phiList = phiString.split()
-    
+
     # Parse the input and build dictionary representations
     hostDict = parseNewick(hostString, "host")
     parasiteDict = parseNewick(parasiteString, "parasite")
@@ -57,8 +59,9 @@ def newickFormatReader(fileHandle):
 
     if autoclose:
         fileHandle.close()
-    
+
     return hostDict, parasiteDict, phiDict
+
 
 def parseNewick(newickString, treeType):
     """ Queries the user for a newick file name and returns the contents
@@ -76,6 +79,7 @@ def parseNewick(newickString, treeType):
     buildTreeDictionary(buildTree(dfsList), "Top", treeDict, treeType)
     return treeDict
 
+
 def buildTree(dfsList):
     """ Takes as input a list of tuples of the form (nodeName, distanceFromRoot)
         and returns a tuple representation of the tree of the form
@@ -89,8 +93,8 @@ def buildTree(dfsList):
         rootName = dfsList[0][0]
         dist = dfsList[0][1]
         splitPoint = 0
-        for x in range(len(dfsList)-1, 0, -1):
-            if dfsList[x][1] == dist+1: 
+        for x in range(len(dfsList) - 1, 0, -1):
+            if dfsList[x][1] == dist + 1:
                 splitPoint = x
                 break
         leftList = dfsList[1:splitPoint]
@@ -98,6 +102,7 @@ def buildTree(dfsList):
         leftTree = buildTree(leftList)
         rightTree = buildTree(rightList)
         return (rootName, leftTree, rightTree)
+
 
 def buildTreeDictionary(tupleTree, parentVertex, D, treeType):
     """ Takes as input a tuple representation of a tree (constructed by
@@ -126,12 +131,13 @@ def buildTreeDictionary(tupleTree, parentVertex, D, treeType):
             D[edgeName] = edgeName + (leftEdgeName, rightEdgeName)
         buildTreeDictionary(leftTree, root, D, treeType)
         buildTreeDictionary(rightTree, root, D, treeType)
-        
+
+
 def parsePhi(pairs):
     """ Queries the user for a file name containing tip associations of
         the form parasiteTip:hostTip, one entry per line.  Returns a
         tip association dictionary. """
-        
+
     phiDict = {}
     for pair in pairs:
         parasite, colon, host = pair.partition(":")

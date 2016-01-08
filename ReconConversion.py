@@ -26,21 +26,17 @@ def convert(reconciliation, DTL, ParasiteTree, outputFile, n):
     representation is the parent of the given parasite node. This accounts for
     the brecon format's inability to handle losses."""
     freqSum = 0
-    D = {'T': 'trans', 'S': 'spec', 'D': 'dup', 'C': 'gene', 'L': 'loss', \
-         'GT': 'gtrans'}
-    f = open(outputFile + str(n) + ".mowgli.brecon", 'w')
-    event = ""
-    pParent = parasiteParentsDict(ParasiteTree)
+    D = {'T': 'trans', 'S': 'spec', 'D': 'dup', 'C': 'gene', 'L': 'loss', 'GT': 'gtrans'}
+    f = open("{}{}.mowgli.brecon".format(outputFile, n), 'w')
     newRecon = copy.deepcopy(reconciliation)
-    for key in reconciliation.keys():
+    for key in reconciliation:
         if reconciliation[key][0] == 'GT':
             newRecon[key][0] = 'T'
     freqDict = frequencyDict(DTL, newRecon)
     for key in reconciliation:
         freqSum += freqDict[key]
         event = reconciliation[key][0]
-        f.write(key[0] + '\t' + key[1] + '\t' + D[event] + '\t' + \
-                str(freqDict[key]) + '\n')
+        f.write("{}\t{}\t{}\t{}\n".format(key[0], key[1], D[event], freqDict[key]))
     f.close()
 
 
@@ -53,41 +49,36 @@ def freqSummation(argList):
     scores, the total cost of those reconciliations and the number of
     reconciliations of those trees."""
     newickFile = argList[0]
-    D = float(argList[1])
-    T = float(argList[2])
-    L = float(argList[3])
+    costs = {}
+    costs['D'] = float(argList[1])
+    costs['T'] = float(argList[2])
+    costs['L'] = float(argList[3])
     freqType = argList[4]
     switchLo = float(argList[5])
     switchHi = float(argList[6])
     lossLo = float(argList[7])
     lossHi = float(argList[8])
     fileName = newickFile[:-7]
-    f = open(fileName + "freqFile.txt", 'w')
+    f = open("{}freqFile.txt".format(fileName), 'w')
     host, paras, phi = newickFormatReader.getInput(newickFile)
-    DTL, numRecon = DP.DP(host, paras, phi, D, T, L)
+    DTL, numRecon = DP.DP(host, paras, phi, costs['D'], costs['T'], costs['L'])
     if freqType == "Frequency":
         newDTL = DTL
     elif freqType == "xscape":
-        newDTL = calcCostscapeScore.newScoreWrapper(newickFile, switchLo, switchHi, lossLo, lossHi, D, T, L)
+        newDTL = calcCostscapeScore.newScoreWrapper(newickFile, switchLo, switchHi, lossLo, lossHi, costs['D'],
+                                                    costs['T'], costs['L'])
     elif freqType == "unit":
-        newDTL = MasterReconciliation.unitScoreDTL(host, paras, phi, D, T, L)
+        newDTL = MasterReconciliation.unitScoreDTL(host, paras, phi, costs['D'], costs['T'], costs['L'])
     scoresList, reconciliation = Greedy.Greedy(newDTL, paras)
-    totalSum = 0
-    for score in scoresList:
-        totalSum += score
+    totalSum = sum(scoresList)
     for index in reconciliation:
         totalCost = 0
         for key in index:
-            if index[key][0] == "L":
-                totalCost += L
-            elif index[key][0] == "T":
-                totalCost += T
-            elif index[key][0] == "D":
-                totalCost += D
-    f.write(str(scoresList) + '\n')
-    f.write(str(totalSum) + '\n')
-    f.write(str(totalCost) + '\n')
-    f.write(str(numRecon))
+            totalCost += costs[index[key][0]]
+    f.write("{}\n".format(scoresList))
+    f.write("{}\n".format(totalSum))
+    f.write("{}\n".format(totalCost))
+    f.write("{}".format(numRecon))
     f.close()
 
 
@@ -99,9 +90,8 @@ def frequencyDict(DTL, reconciliation):
     for key in reconciliation:
         events = DTL[key][:-1]
         for event in events:
-            if event[0] == reconciliation[key][0] and \
-                            event[1] == reconciliation[key][1] and \
-                            event[2] == reconciliation[key][2]:
+            if event[0] == reconciliation[key][0] and event[1] == reconciliation[key][1] and event[2] == \
+                    reconciliation[key][2]:
                 freqDict[key] = event[-1]
     return freqDict
 
@@ -110,7 +100,6 @@ def parasiteParentsDict(P):
     """Takes a parasite tree with edges as keys and returns a dictionary with
     keys which are the bottom nodes of those edges and values which are the
     top nodes of those edges."""
-
     parentsDict = {}
     for key in P:
         if key == 'pTop':

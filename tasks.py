@@ -4,7 +4,7 @@ import ast
 
 import tinys3
 from compbio.vis import transsvg
-from rasmus import treelib1
+from compbio.rasmus import treelib1
 from compbio import phylo
 
 from MasterReconciliation import Reconcile

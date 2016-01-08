@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 import os
 
-from flask import Flask, request, render_template, send_from_directory
+from flask import Flask, request, render_template
 from werkzeug.utils import secure_filename
 from rq import Queue
 import tinys3
@@ -66,7 +66,7 @@ def reconcile(carousel=None):
         job = q.enqueue_call(func=process_files,
                              args=(filename, dup, trans, loss, request.form['scoring'], switch_lo, switch_hi, loss_lo,
                                    loss_hi),
-                             timeout=600)
+                             timeout=1800)
 
         return render_template("results.html", task_id=job.id)
 

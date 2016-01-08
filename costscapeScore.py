@@ -10,7 +10,6 @@
 import time
 import math
 
-
 from newickFormatReader import *
 
 # xscape libraries
@@ -19,13 +18,13 @@ try:
 except ImportError:
     import sys
     from os.path import realpath, dirname, join
+
     sys.path.append(join(realpath(dirname(dirname(__file__))), "python"))
     import xscape
 from xscape.commonAnalytic import *
 from xscape.CostVector import *
 from xscape import reconcile
 from xscape import plotcostsAnalyticNew as plotcosts
-
 
 import shapely
 from shapely.wkt import loads as load_wkt
@@ -39,9 +38,9 @@ def getNewCoordList(newickFile, switchLo, switchHi, lossLo, lossHi):
 
     hostTree, parasiteTree, phi = newickFormatReader(newickFile)
     CVlist = reconcile.reconcile(parasiteTree, hostTree, phi, switchLo, \
-        switchHi, lossLo, lossHi)
+                                 switchHi, lossLo, lossHi)
     coordList = plotcosts.plotcosts(CVlist, lossLo, lossHi, switchLo, \
-        switchHi, "", False, False)
+                                    switchHi, "", False, False)
     print coordList
     newCoordList = []
     for vertexList in coordList:
@@ -61,11 +60,11 @@ def findCenters(newickFile, switchLo, switchHi, lossLo, lossHi):
 
     hostTree, parasiteTree, phi = newickFormatReader(newickFile)
     CVlist = reconcile.reconcile(parasiteTree, hostTree, phi, switchLo, \
-        switchHi, lossLo, lossHi)
+                                 switchHi, lossLo, lossHi)
     coordList = plotcosts.plotcosts(CVlist, lossLo, lossHi, switchLo, \
-        switchHi, "", False, False)
+                                    switchHi, "", False, False)
     polygonList = getNewCoordList(newickFile, switchLo, switchHi, lossLo, \
-        lossHi)
+                                  lossHi)
     pointList = []
     for i in range(len(polygonList)):
         point = polygonList[i]
@@ -74,20 +73,20 @@ def findCenters(newickFile, switchLo, switchHi, lossLo, lossHi):
             if point[j] == ",":
                 numCommas = numCommas + 1
         if numCommas > 1:
-            #polygon case
+            # polygon case
             region = load_wkt(point)
             pointList.append((region.centroid.wkt))
         elif numCommas == 1:
-            #line case
+            # line case
             x1 = coordList[i][0][0]
             y1 = coordList[i][0][1]
             x2 = coordList[i][1][0]
             y2 = coordList[i][1][1]
-            midx = (x1 + x2)*1.0/2
-            midy = (y1 + y2)*1.0/2
+            midx = (x1 + x2) * 1.0 / 2
+            midy = (y1 + y2) * 1.0 / 2
             pointList.append("POINT (" + str(midx) + " " + str(midy) + ")")
         else:
-            #point case
+            # point case
             pointList.append("POINT " + str(coordList[i][0]))
 
     return pointList
