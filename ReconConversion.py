@@ -50,6 +50,7 @@ def freqSummation(argList):
     reconciliations of those trees."""
     newickFile = argList[0]
     costs = {}
+    costs['C'] = 0
     costs['D'] = float(argList[1])
     costs['T'] = float(argList[2])
     costs['L'] = float(argList[3])
