@@ -347,8 +347,27 @@ def preorderCheck(preOrderList):
                 newList[location] = (None, None)
         else:
             preDict[currentRoot] = (currentLevel, x)
-    return newList
 
+    # Correction by Jean Sung, July 2016
+    # newList = [(a1, a2), b] where a is the map node and b is the depth level
+    # Filtering for multiple instances of a with different b by keeping biggest
+    # b instance. This is safe: ensures that all possible parents of a node will
+    # be handled before a node to prevent considering duplicates in the
+    # addScores function.
+    finalList = []
+    for item in newList:
+        node = item[0]
+        depth = item[1]
+        finalList.append(item)
+
+        # Check for duplicate instances with smaller depth levels
+        for newItem in finalList:
+            newNode = newItem[0]
+            newDepth = newItem[1]
+            if (node == newNode) and (depth > newDepth):
+                finalList.remove(newItem)
+                break
+            return finalList
 
 def addScores(treeMin, DTLDict, ScoreDict):
     """Takes the list of reconciliation roots, the DTL reconciliation graph,
